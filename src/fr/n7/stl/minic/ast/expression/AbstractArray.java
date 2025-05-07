@@ -46,17 +46,27 @@ public abstract class AbstractArray<ArrayKind extends Expression> implements Exp
 	 * @see fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.HierarchicalScope)
 	 */
 	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "collect is undefined in Abstract Array.");
-	}
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+    // Collect and partially resolve the array and index expressions
+    boolean arrayResolved = this.array.collectAndPartialResolve(_scope);
+    boolean indexResolved = this.index.collectAndPartialResolve(_scope);
+    // Return true if both are successfully resolved
+    return arrayResolved && indexResolved;
+}
+
+
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.HierarchicalScope)
 	 */
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "resolve is undefined in Abstract Array.");
-	}
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    // Fully resolve the array and index expressions
+    boolean arrayResolved = this.array.completeResolve(_scope);
+    boolean indexResolved = this.index.completeResolve(_scope);
+    // Return true if both are successfully resolved
+    return arrayResolved && indexResolved;
+}
 	
 	/**
 	 * Synthesized Semantics attribute to compute the type of an expression.
