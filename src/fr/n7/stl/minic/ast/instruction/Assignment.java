@@ -82,28 +82,24 @@ public class Assignment implements Instruction, Expression {
 	 * .HierarchicalScope)
 	 */
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		// Retrieve the declaration for the assignable part from the symbol table (TDS)
-		Declaration decl = _scope.get(this.assignable.getName()); // Use _scope to get the symbol, not tds
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    // Vérifier si la variable assignée est connue dans la portée
+    Declaration decl = _scope.get(this.assignable.getName());
+    boolean ok1 = (decl != null);
 
-		boolean ok1 = (decl != null); // Check if the declaration exists in the scope
+    if (!ok1) {
+        Logger.error("Error: Symbol not found in scope for " + this.assignable.getName());
+    } else if (decl instanceof ConstantDeclaration) {
+        Logger.error("Error: Cannot assign to a constant: " + this.assignable.getName());
+        ok1 = false;
+    }
 
-		if (!ok1) {
-			Logger.error("Error: Symbol not found in scope for " + this.assignable.getName());
-		} else if (decl instanceof ConstantDeclaration) {
-			// Check if it's a constant, since we cannot assign to constants
-			Logger.error("Error: Cannot assign to a constant: " + this.assignable.getName());
-			ok1 = false;
-		}
+    // Résoudre l'expression assignable et la valeur
+    boolean ok2 = this.assignable.completeResolve(_scope);
+    boolean ok3 = this.value.completeResolve(_scope);
 
-		// Now resolve the assignable and the value expressions
-		boolean ok2 = this.assignable.completeResolve(_scope);
-		boolean ok3 = this.value.completeResolve(_scope);
-
-		// Return true only if all parts of the assignment are resolved correctly
-		return ok1 && ok2 && ok3;
-	}
-
+    return ok1 && ok2 && ok3;
+}
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -42,12 +42,12 @@ public class ASTBuilder extends MiniCParserBaseListener {
      */
     public void startCompilation() {
         System.out.println(this.name + " " + this.mainBlock);
-        /* SymbolTable tds = new SymbolTable();
-        if (this.mainBlock.collect(tds)) {
+         SymbolTable tds = new SymbolTable();
+        if (this.mainBlock.collectAndPartialResolve(tds)) {
             System.out.println("collect succeeded");
-            if (this.mainBlock.resolve(tds)) {
+            if (this.mainBlock.completeResolve(tds)) {
                 System.out.println("Resolve succeeded.");
-                if (this.mainBlock.checkType()) {
+                /*if (this.mainBlock.checkType()) {
                     System.out.println("Type verification succeeded.");
 
                     System.out.println("Code generation ...");
@@ -72,8 +72,9 @@ public class ASTBuilder extends MiniCParserBaseListener {
                 System.out.println("Resolve failed." + tds);
             }
         } else {
-            System.out.println("Collect failed : " + tds);
-        } */
+            System.out.println("Collect failed : " + tds);*/
+        } 
+        }
     }
 
     @Override

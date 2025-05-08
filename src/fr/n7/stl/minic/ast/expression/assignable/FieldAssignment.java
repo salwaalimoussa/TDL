@@ -15,6 +15,11 @@ import fr.n7.stl.tam.ast.TAMFactory;
  */
 public class FieldAssignment extends AbstractField<AssignableExpression> implements AssignableExpression {
 
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
 	/**
 	 * Construction for the implementation of a record field assignment expression Abstract Syntax Tree node.
 	 * @param _record Abstract Syntax Tree for the record part in a record field assignment expression.

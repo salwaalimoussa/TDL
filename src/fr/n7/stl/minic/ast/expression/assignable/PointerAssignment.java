@@ -5,7 +5,6 @@ package fr.n7.stl.minic.ast.expression.assignable;
 
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.AbstractPointer;
-import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.TAMFactory;
@@ -32,5 +31,10 @@ public class PointerAssignment extends AbstractPointer<AccessibleExpression> imp
 	public Fragment getCode(TAMFactory _factory) {
 		throw new SemanticsUndefinedException("Semantics getCode undefined in PointerAssignment.");
 	}
+	@Override
+		public String getName() {
+			// Provide a meaningful implementation for getName()
+			return this.pointer.toString();
+		}
 	
 }

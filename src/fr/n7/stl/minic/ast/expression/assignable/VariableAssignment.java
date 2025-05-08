@@ -40,6 +40,9 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 	 * fr.n7.stl.block.ast.expression.AbstractIdentifier#collect(fr.n7.stl.block.ast
 	 * .scope.HierarchicalScope)
 	 */
+	// dyal declaration des variables katchuf wach variable name kayn endna f scope 
+	// li huwa table de symbole dyalna si oui katakhd declaration dyalo u katchuf wach
+	// declaration dyalo variable declaration sinon katrja3 erreur
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 		if (((HierarchicalScope<Declaration>) _scope).knows(this.name)) {
@@ -64,6 +67,8 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 	 * fr.n7.stl.block.ast.expression.AbstractIdentifier#resolve(fr.n7.stl.block.ast
 	 * .scope.HierarchicalScope)
 	 */
+	//dima katkhd declaration dyal variable li kayn f scope u katrja3 true hit 
+	// deja kat3rf wach variable kayn f scope u wach declaration dyalo variable b methode lwla
 	@Override
 	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 		return true;

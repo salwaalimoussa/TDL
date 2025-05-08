@@ -9,9 +9,11 @@ import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
+import fr.n7.stl.minic.ast.type.AtomicType;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
+import fr.n7.stl.util.Logger;
 
 /**
  * Implementation of the Abstract Syntax Tree node for a conditional instruction.
@@ -40,9 +42,11 @@ public class Iteration implements Instruction {
 	 * @see fr.n7.stl.block.ast.instruction.Instruction#collect(fr.n7.stl.block.ast.scope.Scope)
 	 */
 	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics collect is undefined in Iteration.");
-	}
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+    boolean conditionResolved = this.condition.collectAndPartialResolve(_scope);
+    boolean bodyResolved = this.body.collectAndPartialResolve(_scope);
+    return conditionResolved && bodyResolved;
+}
 	
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
@@ -53,17 +57,23 @@ public class Iteration implements Instruction {
 	 * @see fr.n7.stl.block.ast.instruction.Instruction#resolve(fr.n7.stl.block.ast.scope.Scope)
 	 */
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics resolve is undefined in Iteration.");
-	}
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    boolean conditionResolved = this.condition.completeResolve(_scope);
+    boolean bodyResolved = this.body.completeResolve(_scope);
+    return conditionResolved && bodyResolved;
+}
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Instruction#checkType()
 	 */
 	@Override
-	public boolean checkType() {
-		throw new SemanticsUndefinedException( "Semantics checkType is undefined in Iteration.");
-	}
+public boolean checkType() {
+    if (!this.condition.getType().equalsTo(AtomicType.BooleanType)) {
+        Logger.error("The condition of the while loop must be of type boolean.");
+        return false;
+    }
+    return this.body.checkType();
+}
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Instruction#allocateMemory(fr.n7.stl.tam.ast.Register, int)

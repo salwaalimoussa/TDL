@@ -86,12 +86,12 @@ public class Conditional implements Instruction {
 	 * .Scope)
 	 */
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		boolean conditionResolved = this.condition.completeResolve(_scope);
-		boolean thenResolved = this.thenBranch.completeResolve(_scope);
-		boolean elseResolved = (this.elseBranch != null) ? this.elseBranch.completeResolve(_scope) : true;
-		return conditionResolved && thenResolved && elseResolved;
-	}
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    boolean conditionResolved = this.condition.completeResolve(_scope);
+    boolean thenResolved = this.thenBranch.completeResolve(_scope);
+    boolean elseResolved = (this.elseBranch != null) ? this.elseBranch.completeResolve(_scope) : true;
+    return conditionResolved && thenResolved && elseResolved;
+}
 
 	/*
 	 * (non-Javadoc)

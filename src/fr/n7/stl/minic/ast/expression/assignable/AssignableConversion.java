@@ -13,4 +13,10 @@ public class AssignableConversion extends AbstractConversion<AssignableExpressio
 		super(_target, _type);
 	}
 
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getName'");
+	}
+
 }

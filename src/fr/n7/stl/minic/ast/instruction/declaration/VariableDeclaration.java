@@ -122,16 +122,15 @@ public class VariableDeclaration implements Declaration, Instruction {
 	 * .Scope)
 	 */
 	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		boolean res = this.value.collectAndPartialResolve(_scope);
-		if (_scope.accepts(this)) {
-			_scope.register(this);
-			return res;
-		} else {
-			Logger.error("Variable already declared: " + this.name);
-			return false;
-		}
-	}
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+    if (_scope.accepts(this)) {
+        _scope.register(this); // Ajouter la déclaration à la table des symboles
+        return true;
+    } else {
+        Logger.error("Variable " + this.getName() + " is already declared in this scope.");
+        return false;
+    }
+}
 
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {

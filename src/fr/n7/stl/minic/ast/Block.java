@@ -7,7 +7,6 @@ import fr.n7.stl.minic.ast.instruction.Instruction;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
-import fr.n7.stl.minic.ast.scope.SymbolTable;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
@@ -65,16 +64,14 @@ public class Block {
 	 *         declaration are
 	 *         allowed.
 	 */
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		boolean result = true;
-		HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
-
-		for (Instruction instruction : this.instructions) {
-			result = instruction.collectAndPartialResolve(localScope) && result;
-		}
-
-		return result;
-	}
+	
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+    boolean result = true;
+    for (Instruction instruction : this.instructions) {
+        result = result && instruction.collectAndPartialResolve(_scope);
+    }
+    return result;
+}
 
 	/**
 	 * Inherited Semantics attribute to collect all the identifiers declaration and
