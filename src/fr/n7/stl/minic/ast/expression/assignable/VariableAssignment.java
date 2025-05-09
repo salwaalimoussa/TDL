@@ -81,9 +81,9 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 	 */
 	@Override
 	public Type getType() {
-		throw new SemanticsUndefinedException("Semantics getType undefined in VariableAssignment.");
+		return this.declaration.getType();	
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -97,7 +97,7 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 		
 		// Load the address of the variable
 		// For a variable assignment, we need its address where the value will be stored
-		fragment.add(_factory.createLOADA(
+		fragment.add(_factory.createLoadA(
 			this.declaration.getRegister(),    // Register where variable is stored
 			this.declaration.getOffset()       // Offset within the register
 		));

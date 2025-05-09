@@ -16,4 +16,8 @@ public class AssignableConditional extends AbstractConditional<AssignableExpress
 		super(_condition, _then, _else);
 	}
 
+	@Override
+	public String getName() {
+		return " AssignableConditional";
+	}
 }

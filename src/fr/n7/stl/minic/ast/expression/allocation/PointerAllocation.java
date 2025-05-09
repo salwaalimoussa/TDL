@@ -9,8 +9,10 @@ import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
+import fr.n7.stl.minic.ast.type.PointerType;
 import fr.n7.stl.minic.ast.type.Type;
 import fr.n7.stl.tam.ast.Fragment;
+import fr.n7.stl.tam.ast.Library;
 import fr.n7.stl.tam.ast.TAMFactory;
 
 /**
@@ -38,7 +40,7 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		return this.size.collectAndPartialResolve(_scope);
+		return true;
 	}
 
 	/* (non-Javadoc)
@@ -58,13 +60,8 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	public Type getType() {
 	
 		if (this.element == null) {
-			return null;
+			throw new SemanticsUndefinedException("Element type for pointer allocation is null.");
 		}
-		if (!this.element.isType()) {
-			return null;
-		}
-
-		// Creates and returns a new PointerType wrapping the element type
 		return new PointerType(this.element);
 
 	}
@@ -75,11 +72,16 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
 		Fragment code = _factory.createFragment();
-		// Allocate space for the pointer (1 word)
-		code.add(_factory.createPush(1));
-		// Call HEAPALLOC to allocate memory
-		code.add(_factory.createHEAPALLOC());
+		// Taille 1 mot (adresse du pointeur)
+		code.add(_factory.createLoadL(this.element.length()));
+		code.add(Library.MAlloc);
 		return code;
 	}
+
+	@Override
+	public String getName() {
+		return "pointer_allocation";
+	}
+
 
 }
