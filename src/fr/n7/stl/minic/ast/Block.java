@@ -37,6 +37,9 @@ public class Block {
 	public Block(List<Instruction> _instructions) {
 		this.instructions = _instructions;
 	}
+	public List<Instruction> getInstructions() {
+		return this.instructions;
+	}
 
 	/*
 	 * (non-Javadoc)

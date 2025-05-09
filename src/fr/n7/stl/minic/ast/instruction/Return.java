@@ -3,16 +3,16 @@
  */
 package fr.n7.stl.minic.ast.instruction;
 
-import java.security.InvalidParameterException;
-
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.Expression;
-import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
+import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
+import fr.n7.stl.util.Logger;
+import java.security.InvalidParameterException;
 
 /**
  * Implementation of the Abstract Syntax Tree node for a return instruction.
@@ -37,22 +37,25 @@ public class Return implements Instruction {
 	public String toString() {
 		return ((this.function != null)?("// Return in function : " + this.function.getName() + "\n"):"") + "return " + this.value + ";\n";
 	}
+	public Expression getValue() {
+		return this.value;
+	}
 	
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.instruction.Instruction#collect(fr.n7.stl.block.ast.scope.Scope)
 	 */
 	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics collect is undefined in Return.");
-	}
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+    return this.value.collectAndPartialResolve(_scope);
+}
 	
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.instruction.Instruction#resolve(fr.n7.stl.block.ast.scope.Scope)
 	 */
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics resolve is undefined in Return.");
-	}
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    return this.value.completeResolve(_scope);
+}
 	
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
@@ -68,9 +71,23 @@ public class Return implements Instruction {
 	 * @see fr.n7.stl.block.ast.Instruction#checkType()
 	 */
 	@Override
-	public boolean checkType() {
-		throw new SemanticsUndefinedException("Semantics checkType undefined in Return.");
-	}
+public boolean checkType() {
+    // Vérifie que la fonction associée est définie
+    if (this.function == null) {
+        Logger.error("Return statement is not associated with a function.");
+        return false;
+    }
+	// kanchoufo wach type de retour est le meme que type de la fonction
+	
+ if (!this.value.getType().equalsTo(this.function.getType())) {
+        Logger.error("The return type does not match the declared return type of the function " + this.function.getName());
+        return false;
+    }
+
+   
+    return true;
+}
+	
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Instruction#allocateMemory(fr.n7.stl.tam.ast.Register, int)

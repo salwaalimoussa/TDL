@@ -70,5 +70,6 @@ public class ParameterDeclaration implements Declaration {
 	public int getOffset() {
 		return this.offset;
 	}
+	
 
 }

@@ -62,6 +62,11 @@ public class VariableDeclaration implements Declaration, Instruction {
 		this.type = _type;
 		this.value = _value;
 	}
+	public VariableDeclaration(String name, Type type, int offset) {
+		this.name = name;
+		this.type = type;
+		this.offset = offset;
+	}
 
 	/*
 	 * (non-Javadoc)
