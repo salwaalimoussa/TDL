@@ -38,7 +38,7 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics collect is undefined in PointerAllocation.");
+		return this.size.collectAndPartialResolve(_scope);
 	}
 
 	/* (non-Javadoc)
@@ -46,7 +46,9 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics resolve is undefined in PointerAllocation.");
+		// Ensures the element type is fully resolved
+		boolean elementOk = this.element.completeResolve(_scope);
+		return elementOk;
 	}
 
 	/* (non-Javadoc)
@@ -54,7 +56,17 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public Type getType() {
-		throw new SemanticsUndefinedException( "Semantics getType is undefined in PointerAllocation.");
+	
+		if (this.element == null) {
+			return null;
+		}
+		if (!this.element.isType()) {
+			return null;
+		}
+
+		// Creates and returns a new PointerType wrapping the element type
+		return new PointerType(this.element);
+
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +74,12 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException( "Semantics getCode is undefined in PointerAllocation.");
+		Fragment code = _factory.createFragment();
+		// Allocate space for the pointer (1 word)
+		code.add(_factory.createPush(1));
+		// Call HEAPALLOC to allocate memory
+		code.add(_factory.createHEAPALLOC());
+		return code;
 	}
 
 }

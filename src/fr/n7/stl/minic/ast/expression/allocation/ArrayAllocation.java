@@ -40,7 +40,9 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	 */
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics collect is undefined in ArrayAllocation.");
+		// This method is part of the first pass semantic analysis
+		// here we need to collect and resolve the size expression
+		return this.size.collectAndPartialResolve(_scope);
 	}
 	
 	/* (non-Javadoc)
@@ -48,7 +50,14 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	 */
 	@Override
 	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics resolve is undefined in ArrayAllocation.");
+		// Part of second pass semantic analysis
+    	// Resolve the element type (e.g., checking if 'int' is a valid type)
+        boolean elementOk = this.element.completeResolve(_scope);
+		// Resolve the size expression (e.g., checking if variables in size expression exist)
+        boolean sizeOk = this.size.completeResolve(_scope);
+        
+        // Both must be valid for array allocation to be correct
+        return elementOk && sizeOk;
 	}
 
 	/* (non-Javadoc)
@@ -56,7 +65,43 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	 */
 	@Override
 	public Type getType() {
-		throw new SemanticsUndefinedException( "Semantics getType is undefined in ArrayAllocation.");
+		// First verify that size expression is an integer
+		Type sizeType = this.size.getType();
+		if (!sizeType.compatibleWith(Type.IntegerType)) {
+			throw new SemanticsUndefinedException(
+				"Array size must be an integer, found: " + sizeType);
+		}
+
+		// Verify that element type is valid
+		if (this.element == null) {
+			throw new SemanticsUndefinedException("Array element type cannot be null");
+		}
+
+		// Handle different possible element types
+		if (this.element.equals(Type.IntegerType)) {
+			return new ArrayType(Type.IntegerType);
+		} else if (this.element.equals(Type.BooleanType)) {
+			return new ArrayType(Type.BooleanType);
+		} else if (this.element.equals(Type.CharacterType)) {
+			return new ArrayType(Type.CharacterType);
+		} else if (this.element.equals(Type.StringType)) {
+			return new ArrayType(Type.StringType);
+		} else if (this.element.equals(Type.FloatingType)) {
+			return new ArrayType(Type.FloatingType);
+		} else if (this.element instanceof ArrayType) {
+			// Handle multi-dimensional arrays
+			return new ArrayType(this.element);
+		} else if (this.element instanceof StructType) {
+			// Handle arrays of structs
+			return new ArrayType(this.element);
+		} else if (this.element instanceof PointerType) {
+			// Handle arrays of pointers
+			return new ArrayType(this.element);
+		}
+
+		// If we get here, it's an unsupported type
+		throw new SemanticsUndefinedException(
+			"Unsupported array element type: " + this.element);
 	}
 
 	/* (non-Javadoc)
@@ -64,7 +109,19 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException( "Semantics getCode is undefined in ArrayAllocation.");
+		Fragment fragment = _factory.createFragment();
+        
+        // Generate code for computing array size
+        fragment.append(this.size.getCode(_factory));
+        
+        // Push element size onto stack and multiply
+        fragment.add(_factory.createLoadL(this.element.length()));
+        fragment.add(_factory.createBinaryOperator("MUL"));
+        
+        // Allocate required memory on heap
+        fragment.add(_factory.createHeapAllocation());
+        
+        return fragment;
 	}
 
 }
