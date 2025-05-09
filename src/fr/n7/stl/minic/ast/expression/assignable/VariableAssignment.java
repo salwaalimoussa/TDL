@@ -95,9 +95,9 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public Type getType() {
-		return this.declaration.getType();
+		return this.declaration.getType();	
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -108,10 +108,11 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	public Fragment getCode(TAMFactory _factory) {
 		Fragment fragment = _factory.createFragment();
 		
-		// Load variable address
+		// Load the address of the variable
+		// For a variable assignment, we need its address where the value will be stored
 		fragment.add(_factory.createLoadA(
-			this.declaration.getRegister(),
-			this.declaration.getOffset()
+			this.declaration.getRegister(),    // Register where variable is stored
+			this.declaration.getOffset()       // Offset within the register
 		));
 		
 		// Store value at address

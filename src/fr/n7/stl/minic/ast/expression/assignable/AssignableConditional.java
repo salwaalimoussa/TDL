@@ -18,7 +18,6 @@ public class AssignableConditional extends AbstractConditional<AssignableExpress
 
 	@Override
 	public String getName() {
-		return "conditional";
+		return " AssignableConditional";
 	}
-
 }

@@ -3,6 +3,8 @@
  */
 package fr.n7.stl.minic.ast.instruction;
 
+import org.antlr.v4.tool.LabelType;
+
 import fr.n7.stl.minic.ast.Block;
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.Expression;
@@ -118,8 +120,14 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory is undefined in Conditional.");
+		// On alloue la mémoire dans les deux branches
+		this.thenBranch.allocateMemory(_register, _offset);
+		if (this.elseBranch != null) {
+			this.elseBranch.allocateMemory(_register, _offset);
+		}
+		return _offset; // L'offset ne change pas en dehors du bloc
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -128,7 +136,35 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode is undefined in Conditional.");
+		Fragment fragment = _factory.createFragment();
+
+		// Crée deux labels uniques
+		String labelElse = "else_" + _factory.createLabelNumber();
+    	String labelEnd = "endif_" + _factory.createLabelNumber();
+
+		// Génère le code de la condition
+		fragment.append(this.condition.getCode(_factory));
+
+		// Si condition fausse, saut vers else (ou end si pas de else)
+		fragment.add(_factory.createJumpIf(labelElse, 0)); // 0 = faux
+
+		// Code de la branche then
+		fragment.append(this.thenBranch.getCode(_factory));
+
+		// Saut inconditionnel vers la fin si y a un else
+		if (this.elseBranch != null) {
+			fragment.add(_factory.createJump(labelEnd));
+
+			// Label du else
+			fragment.addSuffix(labelElse);
+			fragment.append(this.elseBranch.getCode(_factory));
+		}
+
+		// Fin de l'instruction
+		fragment.addSuffix(labelEnd);
+
+		return fragment;
 	}
+
 
 }

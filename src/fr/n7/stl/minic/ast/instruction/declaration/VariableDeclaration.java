@@ -182,8 +182,14 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory is undefined in VariableDeclaration.");
+		// Mémorise où sera stockée la variable
+		this.register = _register;
+		this.offset = _offset;
+
+		// Retourne l’offset suivant (décalé de la taille de la variable)
+		return _offset + this.type.length();
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -192,7 +198,16 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode is undefined in VariableDeclaration.");
+		Fragment fragment = _factory.createFragment();
+
+		// Génère le code qui calcule la valeur initiale de la variable
+		fragment.append(this.value.getCode(_factory));
+
+		// Stocke la valeur calculée à l'adresse de la variable
+		fragment.add(_factory.createStore(this.register, this.offset, this.type.length()));
+
+		return fragment;
 	}
+
 
 }

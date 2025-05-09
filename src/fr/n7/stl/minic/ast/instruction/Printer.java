@@ -8,7 +8,10 @@ import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
+import fr.n7.stl.minic.ast.type.AtomicType;
+import fr.n7.stl.minic.ast.type.Type;
 import fr.n7.stl.tam.ast.Fragment;
+import fr.n7.stl.tam.ast.Library;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
 import fr.n7.stl.util.Logger;
@@ -84,6 +87,25 @@ public class Printer implements Instruction {
 		return true; // Accepte tous les types pour l'instant
 	}
 
+	//si on veut pas accepter tous les types, on peut faire un if else
+	/*@Override
+	public boolean checkType() {
+		Type type = this.parameter.getType();
+		if (type == null) {
+			Logger.error("The expression to print has no type.");
+			return false;
+		}
+		if (!(type.equalsTo(AtomicType.IntegerType)
+			|| type.equalsTo(AtomicType.BooleanType)
+			|| type.equalsTo(AtomicType.CharacterType)
+			|| type.equalsTo(AtomicType.StringType))) {
+			Logger.error("Type " + type + " is not printable.");
+			return false;
+		}
+		return true;
+	}*/
+
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -93,8 +115,9 @@ public class Printer implements Instruction {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory undefined in Printer.");
+		return _offset;  // Pas d'allocation nécessaire
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -103,7 +126,24 @@ public class Printer implements Instruction {
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode undefined in Printer.");
+		Fragment fragment = _factory.createFragment();
+		// Générer le code pour évaluer l'expression
+		fragment.append(this.parameter.getCode(_factory));
+		
+		Type type = this.parameter.getType();
+
+		if (type.equalsTo(AtomicType.IntegerType)) {
+			fragment.add(Library.IOut);
+		} else if (type.equalsTo(AtomicType.BooleanType)) {
+			fragment.add(Library.BOut);
+		} else if (type.equalsTo(AtomicType.CharacterType)) {
+			fragment.add(Library.COut);
+		} else {
+			fragment.add(Library.SOut);  // chaîne ou autre
+		}
+
+		return fragment;
 	}
+
 
 }

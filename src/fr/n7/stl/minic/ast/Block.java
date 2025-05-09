@@ -92,7 +92,13 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 *         allowed.
 	 */
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
-		throw new SemanticsUndefinedException("Semantics collect is undefined in Iteration.");
+ 		boolean result = true;
+		 // Parcourt toutes les instructions du bloc
+		for (Instruction instruction : this.instructions) {
+			// Chaque instruction est collectée dans le contexte de la fonction courante (_container)
+			result = result && instruction.collectAndPartialResolve(_scope, _container);
+		}
+		return result;	
 	}
 
 	/**
@@ -142,8 +148,14 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 * @param _offset   Inherited Current offset for the address of the variables.
 	 */
 	public void allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory is undefined in Block.");
+    int currentOffset = _offset;
+		for (Instruction instruction : this.instructions) {
+			// Chaque instruction peut allouer de la mémoire si elle le souhaite
+			currentOffset = instruction.allocateMemory(_register, currentOffset);
+		}
+		// Pas de retour ici, car méthode void → l'appelant doit gérer la suite s’il veut l’offset
 	}
+
 
 	/**
 	 * Inherited Semantics attribute to build the nodes of the abstract syntax tree
@@ -154,7 +166,15 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 * @return Synthesized AST for the generated TAM code.
 	 */
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics generateCode is undefined in Block.");
+		Fragment fragment = _factory.createFragment();
+
+		for (Instruction instruction : this.instructions) {
+			// Génère et ajoute le code de chaque instruction à ce bloc
+			fragment.append(instruction.getCode(_factory));
+		}
+
+		return fragment;
 	}
+
 
 }

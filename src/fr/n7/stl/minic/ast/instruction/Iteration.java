@@ -80,15 +80,42 @@ public boolean checkType() {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException( "Semantics allocateMemory is undefined in Iteration.");
+		this.body.allocateMemory(_register, _offset);
+		return _offset;
 	}
+
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException( "Semantics getCode is undefined in Iteration.");
+		Fragment fragment = _factory.createFragment();
+
+		// Labels uniques pour la boucle
+		String startLabel = "while_start_" + _factory.createLabelNumber();
+		String endLabel = "while_end_" + _factory.createLabelNumber();
+
+		// Place le label de début
+		fragment.addSuffix(startLabel);
+
+		// Évaluer la condition
+		fragment.append(this.condition.getCode(_factory));
+
+		// Si condition fausse (0), sauter à la fin
+		fragment.add(_factory.createJumpIf(endLabel, 0));
+
+		// Corps de la boucle
+		fragment.append(this.body.getCode(_factory));
+
+		// Sauter en haut de la boucle
+		fragment.add(_factory.createJump(startLabel));
+
+		// Label de fin de boucle
+		fragment.addSuffix(endLabel);
+
+		return fragment;
 	}
+
 
 }

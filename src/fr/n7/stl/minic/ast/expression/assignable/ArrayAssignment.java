@@ -54,7 +54,8 @@ public class ArrayAssignment extends AbstractArray<AssignableExpression> impleme
 
 	@Override
 	public String getName() {
-		return "ArrayAssignment";
+		return "array_assignment";
 	}
+
 	
 }

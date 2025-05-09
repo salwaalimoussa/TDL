@@ -94,15 +94,30 @@ public boolean checkType() {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory undefined in Return.");
+		// Le return ne déclare pas de mémoire locale supplémentaire
+		return 0;
 	}
+
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
+
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode undefined in Return.");
+		Fragment fragment = _factory.createFragment();
+
+		// Génère le code pour évaluer l'expression retournée
+		fragment.append(this.value.getCode(_factory));
+
+		// Ajoute une instruction de retour TAM
+		// _keep : taille de la valeur retournée (normalement 1 pour un type atomique)
+		// _remove : taille de la mémoire allouée pour les variables locales de la fonction
+		//fragment.add(_factory.createReturn(this.function.getType().length(), this.function.getBody().getAllocatedSize()));
+		fragment.add(_factory.createReturn(this.function.getType().length(), 0));
+
+		return fragment;
 	}
+
 
 }

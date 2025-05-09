@@ -42,11 +42,13 @@ public class FieldAssignment extends AbstractField<AssignableExpression> impleme
         
         // 2. Add the offset of the field within the record
         // This offset is calculated from the record's type declaration
-        int fieldOffset = this.field.getOffset();
-        fragment.add(_factory.createLoadL(fieldOffset));
+		//int fieldOffset = this.record.getType().getOffset(this.name);
+		//fragment.add(_factory.createLoadL(fieldOffset));
+
+		fragment.add(_factory.createLoadL(0)); // Remplacer 0 par l'offset réel plus tard
         
         // 3. Add the offset to the base address to get field address
-        fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Add));
+    	fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Add));
         
         return fragment;
     }
