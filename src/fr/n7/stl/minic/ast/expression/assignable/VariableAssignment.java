@@ -92,7 +92,17 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode undefined in VariableAssignment.");
+		// Create a new code fragment
+		Fragment fragment = _factory.createFragment();
+		
+		// Load the address of the variable
+		// For a variable assignment, we need its address where the value will be stored
+		fragment.add(_factory.createLOADA(
+			this.declaration.getRegister(),    // Register where variable is stored
+			this.declaration.getOffset()       // Offset within the register
+		));
+		
+		return fragment;
 	}
 
 	// on a ajoute cela pour que la classe assignement fonctionne pour le tp2 et on

@@ -29,7 +29,15 @@ public class PointerAssignment extends AbstractPointer<AccessibleExpression> imp
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode undefined in PointerAssignment.");
+		// Create new fragment to store the generated code
+		Fragment fragment = _factory.createFragment();
+		
+		// 1. Generate code to compute the pointer address
+		fragment.append(this.pointer.getCode(_factory));
+
+		// 2. Return the fragment containing the pointer's address
+		// For assignment, we need the address where we'll store the value
+		return fragment;
 	}
 	@Override
 		public String getName() {

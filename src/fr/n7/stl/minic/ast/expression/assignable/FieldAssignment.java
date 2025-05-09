@@ -32,9 +32,23 @@ public class FieldAssignment extends AbstractField<AssignableExpression> impleme
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.impl.FieldAccessImpl#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
-	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode undefined in FieldAssignment.");
-	}
+	 @Override
+    public Fragment getCode(TAMFactory _factory) {
+        // Create new fragment to store generated code
+        Fragment fragment = _factory.createFragment();
+        
+        // 1. Generate code to compute the base address of the record
+        fragment.append(this.record.getCode(_factory));
+        
+        // 2. Add the offset of the field within the record
+        // This offset is calculated from the record's type declaration
+        int fieldOffset = this.record.getType().getOffset(this.name);
+        fragment.add(_factory.createLoadL(fieldOffset));
+        
+        // 3. Add the offset to the base address to get field address
+        fragment.add(_factory.createADD(1));
+        
+        return fragment;
+    }
 	
 }
