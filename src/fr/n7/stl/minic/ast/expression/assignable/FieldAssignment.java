@@ -3,8 +3,8 @@
  */
 package fr.n7.stl.minic.ast.expression.assignable;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.AbstractField;
+import fr.n7.stl.minic.ast.expression.accessible.BinaryOperator;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.TAMFactory;
 
@@ -42,11 +42,11 @@ public class FieldAssignment extends AbstractField<AssignableExpression> impleme
         
         // 2. Add the offset of the field within the record
         // This offset is calculated from the record's type declaration
-        int fieldOffset = this.record.getType().getOffset(this.name);
+        int fieldOffset = this.field.getOffset();
         fragment.add(_factory.createLoadL(fieldOffset));
         
         // 3. Add the offset to the base address to get field address
-        fragment.add(_factory.createADD(1));
+        fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Add));
         
         return fragment;
     }

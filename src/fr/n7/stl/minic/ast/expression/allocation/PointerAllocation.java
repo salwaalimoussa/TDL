@@ -3,14 +3,14 @@
  */
 package fr.n7.stl.minic.ast.expression.allocation;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
-import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
+import fr.n7.stl.minic.ast.type.PointerType;
 import fr.n7.stl.minic.ast.type.Type;
 import fr.n7.stl.tam.ast.Fragment;
+import fr.n7.stl.tam.ast.Library;
 import fr.n7.stl.tam.ast.TAMFactory;
 
 /**
@@ -38,7 +38,8 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		return this.size.collectAndPartialResolve(_scope);
+		return this.element.completeResolve(_scope);
+
 	}
 
 	/* (non-Javadoc)
@@ -46,9 +47,8 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		// Ensures the element type is fully resolved
-		boolean elementOk = this.element.completeResolve(_scope);
-		return elementOk;
+		return this.element.completeResolve(_scope);
+
 	}
 
 	/* (non-Javadoc)
@@ -56,17 +56,8 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public Type getType() {
-	
-		if (this.element == null) {
-			return null;
-		}
-		if (!this.element.isType()) {
-			return null;
-		}
-
-		// Creates and returns a new PointerType wrapping the element type
+		// Return the pointer type that represents this allocation
 		return new PointerType(this.element);
-
 	}
 
 	/* (non-Javadoc)
@@ -74,12 +65,20 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		Fragment code = _factory.createFragment();
-		// Allocate space for the pointer (1 word)
-		code.add(_factory.createPush(1));
-		// Call HEAPALLOC to allocate memory
-		code.add(_factory.createHEAPALLOC());
-		return code;
+		Fragment fragment = _factory.createFragment();
+    
+		// Load size of the pointed type
+		fragment.add(_factory.createLoadL(this.element.length()));
+		
+		// Allocate memory on heap
+		fragment.add(Library.MAlloc);
+		
+		return fragment;
+	}
+	
+	@Override
+	public String getName() {
+		return "PointerAllocation";
 	}
 
 }

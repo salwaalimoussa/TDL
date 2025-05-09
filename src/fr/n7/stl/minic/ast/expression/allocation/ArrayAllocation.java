@@ -6,11 +6,16 @@ package fr.n7.stl.minic.ast.expression.allocation;
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
+import fr.n7.stl.minic.ast.expression.accessible.BinaryOperator;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
+import fr.n7.stl.minic.ast.type.ArrayType;
+import fr.n7.stl.minic.ast.type.AtomicType;
+import fr.n7.stl.minic.ast.type.PointerType;
 import fr.n7.stl.minic.ast.type.Type;
 import fr.n7.stl.tam.ast.Fragment;
+import fr.n7.stl.tam.ast.Library;
 import fr.n7.stl.tam.ast.TAMFactory;
 
 /**
@@ -34,6 +39,8 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	public String toString() {
 		return "new " + this.element + "[ " + this.size + " ]"; 
 	}
+
+	
 	
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.Scope)
@@ -67,7 +74,7 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	public Type getType() {
 		// First verify that size expression is an integer
 		Type sizeType = this.size.getType();
-		if (!sizeType.compatibleWith(Type.IntegerType)) {
+		if (!sizeType.compatibleWith(AtomicType.IntegerType)) {
 			throw new SemanticsUndefinedException(
 				"Array size must be an integer, found: " + sizeType);
 		}
@@ -78,21 +85,18 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 		}
 
 		// Handle different possible element types
-		if (this.element.equals(Type.IntegerType)) {
-			return new ArrayType(Type.IntegerType);
-		} else if (this.element.equals(Type.BooleanType)) {
-			return new ArrayType(Type.BooleanType);
-		} else if (this.element.equals(Type.CharacterType)) {
-			return new ArrayType(Type.CharacterType);
-		} else if (this.element.equals(Type.StringType)) {
-			return new ArrayType(Type.StringType);
-		} else if (this.element.equals(Type.FloatingType)) {
-			return new ArrayType(Type.FloatingType);
+		if (this.element.equals(AtomicType.IntegerType)) {
+			return new ArrayType(AtomicType.IntegerType);
+		} else if (this.element.equals(AtomicType.BooleanType)) {
+			return new ArrayType(AtomicType.BooleanType);
+		} else if (this.element.equals(AtomicType.CharacterType)) {
+			return new ArrayType(AtomicType.CharacterType);
+		} else if (this.element.equals(AtomicType.StringType)) {
+			return new ArrayType(AtomicType.StringType);
+		} else if (this.element.equals(AtomicType.FloatingType)) {
+			return new ArrayType(AtomicType.FloatingType);
 		} else if (this.element instanceof ArrayType) {
 			// Handle multi-dimensional arrays
-			return new ArrayType(this.element);
-		} else if (this.element instanceof StructType) {
-			// Handle arrays of structs
 			return new ArrayType(this.element);
 		} else if (this.element instanceof PointerType) {
 			// Handle arrays of pointers
@@ -116,12 +120,17 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
         
         // Push element size onto stack and multiply
         fragment.add(_factory.createLoadL(this.element.length()));
-        fragment.add(_factory.createBinaryOperator("MUL"));
         
+		fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Multiply));
         // Allocate required memory on heap
-        fragment.add(_factory.createHeapAllocation());
-        
+		fragment.add(Library.MAlloc);
+
         return fragment;
+	}
+
+	@Override
+	public String getName() {
+		return "ArrayAllocation";
 	}
 
 }

@@ -3,10 +3,9 @@
  */
 package fr.n7.stl.minic.ast.expression.assignable;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.AbstractArray;
-import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
+import fr.n7.stl.minic.ast.expression.accessible.BinaryOperator;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.TAMFactory;
 
@@ -44,14 +43,18 @@ public class ArrayAssignment extends AbstractArray<AssignableExpression> impleme
 		fragment.add(_factory.createLoadL(this.array.getType().length()));
 		
 		// 4. Multiply index by element size to get actual offset
-		fragment.add(_factory.createMUL(1));
+		fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Multiply));
 
 		// 5. Add the offset to base address to get target address
-		fragment.add(_factory.createADD(1));
+		fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Add));
 
 		// Return the complete fragment containing array assignment code
 		return fragment;
 	}
 
+	@Override
+	public String getName() {
+		return "ArrayAssignment";
+	}
 	
 }
