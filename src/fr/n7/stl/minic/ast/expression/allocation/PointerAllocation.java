@@ -4,7 +4,6 @@
 package fr.n7.stl.minic.ast.expression.allocation;
 
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
-import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
 import fr.n7.stl.minic.ast.scope.Declaration;
@@ -48,9 +47,8 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 	 */
 	@Override
 	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		// Ensures the element type is fully resolved
-		boolean elementOk = this.element.completeResolve(_scope);
-		return elementOk;
+		return this.element.completeResolve(_scope);
+
 	}
 
 	/* (non-Javadoc)
@@ -63,7 +61,6 @@ public class PointerAllocation implements AccessibleExpression, AssignableExpres
 			throw new SemanticsUndefinedException("Element type for pointer allocation is null.");
 		}
 		return new PointerType(this.element);
-
 	}
 
 	/* (non-Javadoc)

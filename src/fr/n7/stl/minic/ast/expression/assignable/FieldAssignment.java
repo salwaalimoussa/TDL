@@ -3,7 +3,6 @@
  */
 package fr.n7.stl.minic.ast.expression.assignable;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.AbstractField;
 import fr.n7.stl.minic.ast.expression.accessible.BinaryOperator;
 import fr.n7.stl.tam.ast.Fragment;

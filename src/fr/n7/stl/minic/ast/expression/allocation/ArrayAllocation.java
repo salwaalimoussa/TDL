@@ -6,6 +6,7 @@ package fr.n7.stl.minic.ast.expression.allocation;
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
+import fr.n7.stl.minic.ast.expression.accessible.BinaryOperator;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
@@ -40,6 +41,8 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
 	public String toString() {
 		return "new " + this.element + "[ " + this.size + " ]"; 
 	}
+
+	
 	
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.Scope)
@@ -92,8 +95,8 @@ public class ArrayAllocation implements AccessibleExpression, AssignableExpressi
         
         // Push element size onto stack and multiply
         fragment.add(_factory.createLoadL(this.element.length()));
-		fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Multiply));
         
+		fragment.add(TAMFactory.createBinaryOperator(BinaryOperator.Multiply));
         // Allocate required memory on heap
 		fragment.add(Library.MAlloc);
         

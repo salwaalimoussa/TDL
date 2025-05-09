@@ -234,7 +234,22 @@ public boolean checkType() {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory is undefined in FunctionDeclaration.");
+		// On crée un registre de base pour les variables locales de la fonction
+		int currentOffset = 0;
+
+		// On alloue la mémoire pour chaque paramètre de la fonction
+		for (ParameterDeclaration parameter : this.parameters) {
+			// On suppose que les paramètres sont posés en mémoire consécutivement
+			// Pas besoin d’appeler une méthode : on simule le comportement ici
+			currentOffset += parameter.getType().length();
+		}
+
+		// On alloue ensuite la mémoire pour le corps de la fonction (variables locales)
+		this.body.allocateMemory(Register.LB, currentOffset);
+
+		// La fonction n’alloue rien dans le registre global à son niveau d’appel,
+		// donc on retourne simplement l’offset inchangé
+		return _offset;
 	}
 
 	/*
@@ -245,7 +260,28 @@ public boolean checkType() {
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode is undefined in FunctionDeclaration.");
+		Fragment fragment = _factory.createFragment();
+
+		// Étiquette d’entrée de fonction (label)
+		fragment.addPrefix(this.name);
+
+		// Génère le code du corps de la fonction
+		Fragment bodyCode = this.body.getCode(_factory);
+
+		// Ajoute le code du corps à l’ensemble
+		fragment.append(bodyCode);
+
+		// Ajoute une instruction de retour implicite (utile si aucun return explicite n’est là)
+		// → facultatif selon les règles de ton langage
+		//fragment.add(_factory.createReturn(0, this.body.getAllocatedSize()));
+		fragment.add(_factory.createReturn(0, 0));
+
+		return fragment;
 	}
+
+	/*public Block getBody() {
+		return this.body;
+	}
+	*/
 
 }

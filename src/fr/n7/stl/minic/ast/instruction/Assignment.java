@@ -107,8 +107,10 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public Type getType() {
-		throw new SemanticsUndefinedException("Semantics getType is undefined in Assignment.");
+		// On retourne simplement le type de la variable à laquelle on affecte
+		return this.assignable.getType();
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -138,8 +140,9 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		throw new SemanticsUndefinedException("Semantics allocateMemory is undefined in Assignment.");
+		return _offset; // Aucun espace mémoire utilisé ici
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -148,7 +151,19 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException("Semantics getCode is undefined in Assignment.");
+		Fragment fragment = _factory.createFragment();
+
+		// Génère le code pour l'évaluation de la valeur (ex: 5)
+		fragment.append(this.value.getCode(_factory));
+
+		// Génère le code pour obtenir l'adresse de la variable (ex: x)
+		fragment.append(this.assignable.getCode(_factory));
+
+		// Génère le store : stocke la valeur à l'adresse
+		fragment.add(_factory.createStoreI(this.assignable.getType().length()));
+
+		return fragment;
 	}
+
 
 }

@@ -3,7 +3,6 @@
  */
 package fr.n7.stl.minic.ast.expression.assignable;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.AbstractIdentifier;
 import fr.n7.stl.minic.ast.instruction.declaration.VariableDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
@@ -70,9 +69,24 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 	//dima katkhd declaration dyal variable li kayn f scope u katrja3 true hit 
 	// deja kat3rf wach variable kayn f scope u wach declaration dyalo variable b methode lwla
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		return true;
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    // Check if variable declaration exists and is valid
+    if (this.declaration == null) {
+        Logger.error("Variable " + this.name + " has not been declared.");
+        return false;
+    }
+    
+    // Check if variable type is resolved
+    if (this.declaration.getType() == null) {
+        Logger.error("Type of variable " + this.name + " could not be resolved.");
+        return false;
+    
 	}
+	
+    
+    
+    return true;
+}
 
 	/*
 	 * (non-Javadoc)
@@ -92,7 +106,6 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 	 */
 	@Override
 	public Fragment getCode(TAMFactory _factory) {
-		// Create a new code fragment
 		Fragment fragment = _factory.createFragment();
 		
 		// Load the address of the variable
@@ -101,6 +114,9 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 			this.declaration.getRegister(),    // Register where variable is stored
 			this.declaration.getOffset()       // Offset within the register
 		));
+		
+		// Store value at address
+		fragment.add(_factory.createStoreI(this.declaration.getType().length()));
 		
 		return fragment;
 	}
