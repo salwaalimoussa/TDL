@@ -37,6 +37,7 @@ public class Block {
 	public Block(List<Instruction> _instructions) {
 		this.instructions = _instructions;
 	}
+
 	public List<Instruction> getInstructions() {
 		return this.instructions;
 	}
@@ -67,14 +68,14 @@ public class Block {
 	 *         declaration are
 	 *         allowed.
 	 */
-	
-public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-    boolean result = true;
-    for (Instruction instruction : this.instructions) {
-        result = result && instruction.collectAndPartialResolve(_scope);
-    }
-    return result;
-}
+
+	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+		boolean result = true;
+		for (Instruction instruction : this.instructions) {
+			result = result && instruction.collectAndPartialResolve(_scope);
+		}
+		return result;
+	}
 
 	/**
 	 * Inherited Semantics attribute to collect all the identifiers declaration and
@@ -92,13 +93,14 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 *         allowed.
 	 */
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
- 		boolean result = true;
-		 // Parcourt toutes les instructions du bloc
+		boolean result = true;
+		// Parcourt toutes les instructions du bloc
 		for (Instruction instruction : this.instructions) {
-			// Chaque instruction est collectée dans le contexte de la fonction courante (_container)
+			// Chaque instruction est collectée dans le contexte de la fonction courante
+			// (_container)
 			result = result && instruction.collectAndPartialResolve(_scope, _container);
 		}
-		return result;	
+		return result;
 	}
 
 	/**
@@ -128,7 +130,7 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 * @return Synthesized True if the instruction is well typed, False if not.
 	 */
 	public boolean checkType() {
-		
+
 		boolean result = true;
 		for (Instruction instruction : this.instructions) {
 			result = instruction.checkType() && result;
@@ -147,14 +149,14 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 * @param _offset   Inherited Current offset for the address of the variables.
 	 */
 	public void allocateMemory(Register _register, int _offset) {
-    int currentOffset = _offset;
+		int currentOffset = _offset;
 		for (Instruction instruction : this.instructions) {
 			// Chaque instruction peut allouer de la mémoire si elle le souhaite
 			currentOffset = instruction.allocateMemory(_register, currentOffset);
 		}
-		// Pas de retour ici, car méthode void → l'appelant doit gérer la suite s’il veut l’offset
+		// Pas de retour ici, car méthode void → l'appelant doit gérer la suite s’il
+		// veut l’offset
 	}
-
 
 	/**
 	 * Inherited Semantics attribute to build the nodes of the abstract syntax tree
@@ -174,6 +176,5 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 
 		return fragment;
 	}
-
 
 }

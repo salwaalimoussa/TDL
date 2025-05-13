@@ -1,12 +1,44 @@
 LOADL 0
 STORE (1) 0[SB]
+<<<<<<< HEAD
 JUMP while_start_1
+=======
+LOADA 0[SB]
+STOREI (1)
+STORE (8) 1[SB]
+;fr.n7.stl.minic.ast.expression.accessible.VariableAccess@574caa3f
+;(i == 0)
+LOAD (1) 0[SB]
+LOADL 0
+SUBR IEq
+JUMPIF (0) else_1
+>>>>>>> 3d0f29a (int* ptr= cela fonctionne dans cette version)
 LOADL 1
 LOADA 0[SB]
 STOREI (1)
 STOREI (1)
+<<<<<<< HEAD
 while_start_1
 ;fr.n7.stl.minic.ast.expression.accessible.VariableAccess@68f7aae2
+=======
+JUMP endif_2
+else_1
+;fr.n7.stl.minic.ast.expression.accessible.VariableAccess@6c629d6e
+;(- i)
+LOAD (1) 0[SB]
+SUBR INeg
+LOADA 0[SB]
+STOREI (1)
+STOREI (1)
+endif_2
+JUMP while_start_3
+LOADL 1
+LOADA 0[SB]
+STOREI (1)
+STOREI (1)
+while_start_3
+;fr.n7.stl.minic.ast.expression.accessible.VariableAccess@5ecddf8f
+>>>>>>> 3d0f29a (int* ptr= cela fonctionne dans cette version)
 ;(i == 2)
 LOAD (1) 0[SB]
 LOADL 2
