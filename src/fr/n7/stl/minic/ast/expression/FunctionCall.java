@@ -3,17 +3,17 @@
  */
 package fr.n7.stl.minic.ast.expression;
 
-import java.util.Iterator;
-import java.util.List;
-
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.accessible.AccessibleExpression;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
 import fr.n7.stl.minic.ast.type.Type;
 import fr.n7.stl.tam.ast.Fragment;
+import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
+import fr.n7.stl.util.Logger;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Abstract Syntax Tree node for a function call expression.
@@ -70,31 +70,72 @@ public class FunctionCall implements AccessibleExpression {
 	 */
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics collect is undefined in FunctionCall.");
+		boolean _result = true;
+		for (AccessibleExpression _argument : this.arguments) {
+			_result &= _argument.collectAndPartialResolve(_scope);
+		}
+		if (_scope.contains(this.name)) {
+			this.function = (FunctionDeclaration) _scope.get(this.name);
+		} else {
+			this.function = null;
+			Logger.error("Function " + this.name + " is not declared.");
+			_result = false;
+		}
+		return _result;
 	}
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.HierarchicalScope)
 	 */
 	@Override
-	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		throw new SemanticsUndefinedException( "Semantics resolve is undefined in FunctionCall.");
-	}
+public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+    // 1. Resolve function declaration
+    Declaration declaration = _scope.get(this.name);
+    if (declaration == null || !(declaration instanceof FunctionDeclaration)) {
+        Logger.error("Function " + this.name + " is not defined.");
+        return false;
+    }
+    this.function = (FunctionDeclaration) declaration;
+
+    // 2. Resolve arguments
+    boolean result = true;
+    for (AccessibleExpression arg : this.arguments) {
+        result = result && arg.completeResolve(_scope);
+    }
+
+    return result;
+}
+
 	
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Expression#getType()
 	 */
 	@Override
 	public Type getType() {
-		throw new SemanticsUndefinedException( "Semantics getType is undefined in FunctionCall.");
+		if (this.function != null) {
+			return this.function.getType();
+		} else {
+			Logger.error("Function " + this.name + " is not declared.");
+			return null;
+		}
 	}
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Expression#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		throw new SemanticsUndefinedException( "Semantics getCode is undefined in FunctionCall.");
-	}
+public Fragment getCode(TAMFactory _factory) {
+    Fragment fragment = _factory.createFragment();
+    
+    // 1. Generate code for arguments in reverse order
+    for (int i = this.arguments.size() - 1; i >= 0; i--) {
+        fragment.append(this.arguments.get(i).getCode(_factory));
+    }
+    
+    // 2. Call function
+    fragment.add(_factory.createCall(this.name, Register.LB));
+    
+    return fragment;
+}
 
 }

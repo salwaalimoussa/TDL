@@ -92,27 +92,25 @@ public boolean checkType() {
 public Fragment getCode(TAMFactory _factory) {
     Fragment fragment = _factory.createFragment();
     
-    // Generate unique labels
     String startLabel = "while_start_" + _factory.createLabelNumber();
     String endLabel = "while_end_" + _factory.createLabelNumber();
-
-    // Start with a jump to condition evaluation
+    
+    // Add initial JUMP to make fragment non-empty
     fragment.add(_factory.createJump(startLabel));
     
-    // Body code
+    // Loop body
     fragment.append(this.body.getCode(_factory));
     
-    // Condition label and evaluation
+    // Start label (now safe to add as fragment has content)
     fragment.addSuffix(startLabel);
-    fragment.append(this.condition.getCode(_factory));
     
-    // Jump back to body if condition is true (non-zero)
+    // Condition evaluation
+    fragment.append(this.condition.getCode(_factory));
     fragment.add(_factory.createJumpIf("while_body_" + startLabel, 1));
     
     // End label
     fragment.addSuffix(endLabel);
-
+    
     return fragment;
 }
-
 }

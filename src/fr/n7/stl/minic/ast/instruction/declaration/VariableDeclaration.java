@@ -197,17 +197,17 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
-
-		// Génère le code qui calcule la valeur initiale de la variable
-		fragment.append(this.value.getCode(_factory));
-
-		// Stocke la valeur calculée à l'adresse de la variable
-		fragment.add(_factory.createStore(this.register, this.offset, this.type.length()));
-
-		return fragment;
-	}
+    public Fragment getCode(TAMFactory _factory) {
+        Fragment fragment = _factory.createFragment();
+        
+        // Generate value code
+        fragment.append(value.getCode(_factory));
+        
+        // Store value
+        fragment.add(_factory.createStore(register, offset, type.length()));
+        
+        return fragment;
+    }
 
 
 }

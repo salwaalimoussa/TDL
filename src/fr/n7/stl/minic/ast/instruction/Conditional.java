@@ -3,10 +3,7 @@
  */
 package fr.n7.stl.minic.ast.instruction;
 
-import org.antlr.v4.tool.LabelType;
-
 import fr.n7.stl.minic.ast.Block;
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
@@ -135,36 +132,29 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
-
-		// Crée deux labels uniques
-		String labelElse = "else_" + _factory.createLabelNumber();
-    	String labelEnd = "endif_" + _factory.createLabelNumber();
-
-		// Génère le code de la condition
-		fragment.append(this.condition.getCode(_factory));
-
-		// Si condition fausse, saut vers else (ou end si pas de else)
-		fragment.add(_factory.createJumpIf(labelElse, 0)); // 0 = faux
-
-		// Code de la branche then
-		fragment.append(this.thenBranch.getCode(_factory));
-
-		// Saut inconditionnel vers la fin si y a un else
-		if (this.elseBranch != null) {
-			fragment.add(_factory.createJump(labelEnd));
-
-			// Label du else
-			fragment.addSuffix(labelElse);
-			fragment.append(this.elseBranch.getCode(_factory));
-		}
-
-		// Fin de l'instruction
-		fragment.addSuffix(labelEnd);
-
-		return fragment;
-	}
-
+public Fragment getCode(TAMFactory _factory) {
+    Fragment fragment = _factory.createFragment();
+    
+    String labelElse = "else_" + _factory.createLabelNumber();
+    String labelEnd = "endif_" + _factory.createLabelNumber();
+    
+    // Condition code
+    fragment.append(this.condition.getCode(_factory));
+    fragment.add(_factory.createJumpIf(labelElse, 0));
+    
+    // Then branch
+    fragment.append(this.thenBranch.getCode(_factory));
+    
+    if (this.elseBranch != null) {
+        fragment.add(_factory.createJump(labelEnd));
+        fragment.addSuffix(labelElse);
+        fragment.append(this.elseBranch.getCode(_factory));
+        fragment.addSuffix(labelEnd);
+    } else {
+        fragment.addSuffix(labelElse);
+    }
+    
+    return fragment;
+}
 
 }

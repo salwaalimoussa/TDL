@@ -4,7 +4,6 @@
 package fr.n7.stl.minic.ast.instruction.declaration;
 
 import fr.n7.stl.minic.ast.Block;
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.instruction.Instruction;
 import fr.n7.stl.minic.ast.instruction.Return;
 import fr.n7.stl.minic.ast.scope.Declaration;
@@ -194,35 +193,41 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 */
 	@Override
 public boolean checkType() {
-    // Vérifie que le corps de la fonction est bien typé
-    boolean bodyTypeCorrect = this.body.checkType();
-
-    // Vérifie que le type de retour est respecté
+    // Create new scope for function
+    HierarchicalScope<Declaration> functionScope = new SymbolTable();
+    
+    // Add parameters to scope
+    for (ParameterDeclaration param : parameters) {
+        functionScope.register(param);
+    }
+    
+    // Step 1: Set function context with proper scope
+    boolean contextSet = this.body.collectAndPartialResolve(functionScope, this);
+    if (!contextSet) {
+        return false;
+    }
+    
+    // Step 2: Check return types
     boolean returnTypeCorrect = false;
-
-    // Parcourt les instructions du corps de la fonction
-    for (Instruction instruction : this.body.getInstructions()) { 
-        if (instruction instanceof Return) { 
+    for (Instruction instruction : this.body.getInstructions()) {
+        if (instruction instanceof Return) {
             Return returnInstruction = (Return) instruction;
-
-            // Vérifie si le type de la valeur retournée correspond au type déclaré
             if (returnInstruction.getValue().getType().equalsTo(this.type)) {
                 returnTypeCorrect = true;
             } else {
-                Logger.error("The return type of the function " + this.name + " does not match the expected type: " + this.type);
+                Logger.error("Function " + this.name + " return type mismatch");
                 return false;
             }
         }
     }
-
-    // Vérifie qu'il existe au moins une instruction de retour valide
+    
     if (!returnTypeCorrect) {
-        Logger.error("The function " + this.name + " does not have a valid return statement.");
+        Logger.error("Function " + this.name + " missing return");
         return false;
     }
-
-    // Retourne true si tout est correct
-    return bodyTypeCorrect && returnTypeCorrect;
+    
+    // Step 3: Check body types with proper scope
+    return this.body.checkType();
 }
 
 	/*
@@ -259,25 +264,26 @@ public boolean checkType() {
 	 * TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
-
-		// Étiquette d’entrée de fonction (label)
-		fragment.addPrefix(this.name);
-
-		// Génère le code du corps de la fonction
-		Fragment bodyCode = this.body.getCode(_factory);
-
-		// Ajoute le code du corps à l’ensemble
-		fragment.append(bodyCode);
-
-		// Ajoute une instruction de retour implicite (utile si aucun return explicite n’est là)
-		// → facultatif selon les règles de ton langage
-		//fragment.add(_factory.createReturn(0, this.body.getAllocatedSize()));
-		fragment.add(_factory.createReturn(0, 0));
-
-		return fragment;
-	}
+public Fragment getCode(TAMFactory _factory) {
+    Fragment fragment = _factory.createFragment();
+    
+    // 1. Add PUSH to make fragment non-empty before label
+    fragment.add(_factory.createPush(0));
+    
+    // 2. Now we can add the label safely
+    fragment.addPrefix(this.name);
+    
+    // 3. Remove temporary PUSH
+    fragment.add(_factory.createPop(0, 0));
+    // 4. Generate and add body code
+    Fragment bodyCode = this.body.getCode(_factory);
+    fragment.append(bodyCode);
+    
+    // 5. Add return sequence
+    fragment.add(_factory.createReturn(0, 0));
+    
+    return fragment;
+}
 
 	/*public Block getBody() {
 		return this.body;

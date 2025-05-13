@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
-
 import fr.n7.stl.minic.ast.Block;
 import fr.n7.stl.minic.ast.expression.*;
 import fr.n7.stl.minic.ast.expression.accessible.*;
