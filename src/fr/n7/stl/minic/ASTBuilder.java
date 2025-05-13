@@ -47,7 +47,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
             System.out.println("collect succeeded");
             if (this.mainBlock.completeResolve(tds)) {
                 System.out.println("Resolve succeeded.");
-                /*if (this.mainBlock.checkType()) {
+                if (this.mainBlock.checkType()) {
                     System.out.println("Type verification succeeded.");
 
                     System.out.println("Code generation ...");
@@ -57,7 +57,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
                         TAMFactory factory = new TAMFactoryImpl();
                         Fragment f = this.mainBlock.getCode(factory);
                         f.add(factory.createHalt());
-                        f.append(this.mainBlock.getFunctions(factory));
+                        //f.append(this.mainBlock.getFunctions(factory));
                         writer.println(f);
                         writer.close();
                     } catch (IOException e) {
@@ -72,11 +72,10 @@ public class ASTBuilder extends MiniCParserBaseListener {
                 System.out.println("Resolve failed." + tds);
             }
         } else {
-            System.out.println("Collect failed : " + tds);*/
+            System.out.println("Collect failed : " + tds);
         } 
         }
-        }
-
+        
     @Override
     public void exitProgramme(ProgrammeContext ctx) {
         this.mainBlock = ctx.main.b;

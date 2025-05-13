@@ -89,33 +89,30 @@ public boolean checkType() {
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
+public Fragment getCode(TAMFactory _factory) {
+    Fragment fragment = _factory.createFragment();
+    
+    // Generate unique labels
+    String startLabel = "while_start_" + _factory.createLabelNumber();
+    String endLabel = "while_end_" + _factory.createLabelNumber();
 
-		// Labels uniques pour la boucle
-		String startLabel = "while_start_" + _factory.createLabelNumber();
-		String endLabel = "while_end_" + _factory.createLabelNumber();
+    // Start with a jump to condition evaluation
+    fragment.add(_factory.createJump(startLabel));
+    
+    // Body code
+    fragment.append(this.body.getCode(_factory));
+    
+    // Condition label and evaluation
+    fragment.addSuffix(startLabel);
+    fragment.append(this.condition.getCode(_factory));
+    
+    // Jump back to body if condition is true (non-zero)
+    fragment.add(_factory.createJumpIf("while_body_" + startLabel, 1));
+    
+    // End label
+    fragment.addSuffix(endLabel);
 
-		// Place le label de début
-		fragment.addSuffix(startLabel);
-
-		// Évaluer la condition
-		fragment.append(this.condition.getCode(_factory));
-
-		// Si condition fausse (0), sauter à la fin
-		fragment.add(_factory.createJumpIf(endLabel, 0));
-
-		// Corps de la boucle
-		fragment.append(this.body.getCode(_factory));
-
-		// Sauter en haut de la boucle
-		fragment.add(_factory.createJump(startLabel));
-
-		// Label de fin de boucle
-		fragment.addSuffix(endLabel);
-
-		return fragment;
-	}
-
+    return fragment;
+}
 
 }
