@@ -1,0 +1,17 @@
+LOADL 0
+STORE (1) 0[SB]
+JUMP while_start_1
+LOADL 1
+LOADA 0[SB]
+STOREI (1)
+STOREI (1)
+while_start_1
+;fr.n7.stl.minic.ast.expression.accessible.VariableAccess@68f7aae2
+;(i == 2)
+LOAD (1) 0[SB]
+LOADL 2
+SUBR IEq
+JUMPIF (1) while_body_while_start_1
+while_end_2
+HALT
+

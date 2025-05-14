@@ -62,6 +62,7 @@ public class VariableDeclaration implements Declaration, Instruction {
 		this.type = _type;
 		this.value = _value;
 	}
+
 	public VariableDeclaration(String name, Type type, int offset) {
 		this.name = name;
 		this.type = type;
@@ -127,15 +128,15 @@ public class VariableDeclaration implements Declaration, Instruction {
 	 * .Scope)
 	 */
 	@Override
-public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-    if (_scope.accepts(this)) {
-        _scope.register(this); // Ajouter la déclaration à la table des symboles
-        return true;
-    } else {
-        Logger.error("Variable " + this.getName() + " is already declared in this scope.");
-        return false;
-    }
-}
+	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+		if (_scope.accepts(this)) {
+			_scope.register(this); // Ajouter la déclaration à la table des symboles
+			return true;
+		} else {
+			Logger.error("Variable " + this.getName() + " is already declared in this scope.");
+			return false;
+		}
+	}
 
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
@@ -162,7 +163,7 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 		// Vérifier si le type de la valeur est compatible avec le type déclaré
 		// Exemple : si la déclaration est "int x = 5;", this.type est "int" et
 		// valueType est "int".
-		if (this.type.equals(valueType)) {
+		if (this.type.equalsTo(valueType)) {
 			return true; // Les types correspondent, la déclaration est valide.
 		} else {
 			// En cas d'incompatibilité, enregistrer une erreur et retourner false
@@ -190,7 +191,6 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 		return _offset + this.type.length();
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -208,6 +208,5 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
         
         return fragment;
     }
-
 
 }
