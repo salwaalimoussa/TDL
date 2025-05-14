@@ -91,24 +91,25 @@ public boolean checkType() {
 	@Override
 public Fragment getCode(TAMFactory _factory) {
     Fragment fragment = _factory.createFragment();
-    
     String startLabel = "while_start_" + _factory.createLabelNumber();
     String endLabel = "while_end_" + _factory.createLabelNumber();
     
-    // Add initial JUMP to make fragment non-empty
+    // Add initial instruction to make fragment non-empty
     fragment.add(_factory.createJump(startLabel));
     
     // Loop body
-    fragment.append(this.body.getCode(_factory));
+    fragment.append(body.getCode(_factory));
     
-    // Start label (now safe to add as fragment has content)
+    // Add start label (now safe as fragment has content)
     fragment.addSuffix(startLabel);
     
     // Condition evaluation
-    fragment.append(this.condition.getCode(_factory));
+    fragment.append(condition.getCode(_factory));
+    
+    // Jump back to body if condition true
     fragment.add(_factory.createJumpIf("while_body_" + startLabel, 1));
     
-    // End label
+    // Add end label
     fragment.addSuffix(endLabel);
     
     return fragment;

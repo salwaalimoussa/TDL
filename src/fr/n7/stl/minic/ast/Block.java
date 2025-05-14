@@ -164,16 +164,20 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 	 * @param _factory Inherited Factory to build AST nodes for TAM code.
 	 * @return Synthesized AST for the generated TAM code.
 	 */
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
-
-		for (Instruction instruction : this.instructions) {
-			// Génère et ajoute le code de chaque instruction à ce bloc
-			fragment.append(instruction.getCode(_factory));
-		}
-
-		return fragment;
-	}
-
+	
+	
+	 public Fragment getCode(TAMFactory _factory) {
+		 Fragment fragment = _factory.createFragment();
+		 
+		 // Debug
+		 System.out.println("Generating code for Block");
+		 
+		 // Génération du code pour chaque instruction du bloc
+		 for (Instruction instruction : this.instructions) {
+			 fragment.append(instruction.getCode(_factory));
+		 }
+		 
+		 return fragment;
+	 }
 
 }

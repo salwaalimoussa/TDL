@@ -56,7 +56,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
                         TAMFactory factory = new TAMFactoryImpl();
                         Fragment f = this.mainBlock.getCode(factory);
                         f.add(factory.createHalt());
-                        //f.append(this.mainBlock.getFunctions(factory));
+                       // f.append(this.mainBlock.getFunctions(factory));
                         writer.println(f);
                         writer.close();
                     } catch (IOException e) {

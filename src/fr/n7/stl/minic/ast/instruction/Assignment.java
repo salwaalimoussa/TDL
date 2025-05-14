@@ -3,7 +3,6 @@
  */
 package fr.n7.stl.minic.ast.instruction;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
 import fr.n7.stl.minic.ast.instruction.declaration.ConstantDeclaration;
@@ -164,6 +163,7 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 
 		return fragment;
 	}
+	
 
 
 }

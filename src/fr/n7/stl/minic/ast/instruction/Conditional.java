@@ -135,22 +135,34 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 public Fragment getCode(TAMFactory _factory) {
     Fragment fragment = _factory.createFragment();
     
+    // Création des étiquettes pour les sauts
     String labelElse = "else_" + _factory.createLabelNumber();
     String labelEnd = "endif_" + _factory.createLabelNumber();
     
-    // Condition code
+    // Génération du code pour évaluer la condition
     fragment.append(this.condition.getCode(_factory));
+    
+    // Si la condition est fausse (0), sauter à la branche else ou à la fin
     fragment.add(_factory.createJumpIf(labelElse, 0));
     
-    // Then branch
+    // Code pour la branche "then"
     fragment.append(this.thenBranch.getCode(_factory));
     
+    // Si une branche "else" existe
     if (this.elseBranch != null) {
+        // À la fin du bloc "then", sauter à la fin pour éviter d'exécuter le bloc "else"
         fragment.add(_factory.createJump(labelEnd));
+        
+        // Étiquette pour le début du bloc "else"
         fragment.addSuffix(labelElse);
+        
+        // Code pour la branche "else"
         fragment.append(this.elseBranch.getCode(_factory));
+        
+        // Étiquette pour la fin de l'instruction conditionnelle
         fragment.addSuffix(labelEnd);
     } else {
+        // Si pas de branche "else", l'étiquette "else" marque directement la fin
         fragment.addSuffix(labelElse);
     }
     
