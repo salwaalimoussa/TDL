@@ -1,10 +1,18 @@
 fact
 PUSH 0
 POP (0) 0
+;(n == 0)
 LOAD (1) -1[LB]
-STORE (1) 1[LB]
+LOADL 0
+SUBR IEq
+JUMPIF (0) else_1
+LOADL 1
+RETURN (1) 0
+JUMP endif_2
+else_1
 LOAD (1) -1[LB]
 RETURN (1) 0
+endif_2
 RETURN (0) 0
 HALT
 

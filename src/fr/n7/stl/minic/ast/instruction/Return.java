@@ -11,7 +11,6 @@ import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
 import fr.n7.stl.util.Logger;
-import java.security.InvalidParameterException;
 
 /**
  * Implementation of the Abstract Syntax Tree node for a return instruction.
@@ -55,35 +54,34 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
 public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
     return this.value.completeResolve(_scope);
 }
-	
-	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
-		if (this.function == null) {
-			this.function = _container;		
-		} else {
-			throw new InvalidParameterException("Trying to set a function declaration to a return instruction when one has already been set.");
-		}
-		return this.collectAndPartialResolve(_scope);
-	}
+@Override
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
+    if (this.function == null) {
+        this.function = _container; // Associate the return statement with the function
+    } else if (!this.function.equals(_container)) {
+        Logger.error("Return statement is associated with a different function.");
+        return false;
+    }
+    return this.value.collectAndPartialResolve(_scope);
+}
 
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.Instruction#checkType()
 	 */
 	@Override
 public boolean checkType() {
-    // Vérifie que la fonction associée est définie
+    // Verify that the function is associated
     if (this.function == null) {
         Logger.error("Return statement is not associated with a function.");
         return false;
     }
-	// kanchoufo wach type de retour est le meme que type de la fonction
-	
- if (!this.value.getType().equalsTo(this.function.getType())) {
+
+    // Check if the return type matches the function's declared return type
+    if (!this.value.getType().equalsTo(this.function.getType())) {
         Logger.error("The return type does not match the declared return type of the function " + this.function.getName());
         return false;
     }
 
-   
     return true;
 }
 	

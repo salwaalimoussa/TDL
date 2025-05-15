@@ -4,6 +4,7 @@
 package fr.n7.stl.minic.ast.instruction.declaration;
 
 import fr.n7.stl.minic.ast.Block;
+import fr.n7.stl.minic.ast.instruction.Conditional;
 import fr.n7.stl.minic.ast.instruction.Instruction;
 import fr.n7.stl.minic.ast.instruction.Return;
 import fr.n7.stl.minic.ast.scope.Declaration;
@@ -128,37 +129,37 @@ public class FunctionDeclaration implements Instruction, Declaration {
 	 * The body of the function (return x + y;) is resolved using the local scope.
 	 */
 
-	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		// Enregistre la fonction dans la portée globale
-		if (_scope.accepts(this)) {
-			_scope.register(this);
-		} else {
-			Logger.error("Function " + this.name + " is already declared in this scope.");
-			return false;
-		}
-
-		// Crée une portée locale pour les paramètres et le corps de la fonction
-		HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
-
-		// Enregistre les paramètres dans la portée locale
-		boolean parametersResolved = true;
-		for (ParameterDeclaration parameter : this.parameters) {
-			if (localScope.accepts(parameter)) {
-				localScope.register(parameter); // Enregistre le paramètre
-			} else {
-				Logger.error("Parameter " + parameter.getName() + " is already declared in this scope.");
-				parametersResolved = false;
-			}
-		}
-
-		// Collecte et résout partiellement le corps de la fonction
-		boolean bodyResolved = this.body.collectAndPartialResolve(localScope);
-
-		return parametersResolved && bodyResolved;
-	}
-
-	@Override
+	 // filepath: /Users/elayboudiimane/Documents/semantique/TDL/src/fr/n7/stl/minic/ast/instruction/declaration/FunctionDeclaration.java
+	 @Override
+	 public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+		 // Register the function in the global scope
+		 if (_scope.accepts(this)) {
+			 _scope.register(this);
+		 } else {
+			 Logger.error("Function " + this.name + " is already declared in this scope.");
+			 return false;
+		 }
+	 
+		 // Create a local scope for the function's parameters and body
+		 HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
+	 
+		 // Register parameters in the local scope
+		 boolean parametersResolved = true;
+		 for (ParameterDeclaration parameter : this.parameters) {
+			 if (localScope.accepts(parameter)) {
+				 localScope.register(parameter);
+			 } else {
+				 Logger.error("Parameter " + parameter.getName() + " is already declared in this scope.");
+				 parametersResolved = false;
+			 }
+		 }
+	 
+		 // Pass the FunctionDeclaration instance to the body
+		 boolean bodyResolved = this.body.collectAndPartialResolve(localScope, this);
+	 
+		 return parametersResolved && bodyResolved;
+	 }
+@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _function) {
 		// Delegate to the existing collectAndPartialResolve method
 		return this.collectAndPartialResolve(_scope);
@@ -201,43 +202,46 @@ public class FunctionDeclaration implements Instruction, Declaration {
 	 * @see fr.n7.stl.block.ast.instruction.Instruction#checkType()
 	 */
 	@Override
-	public boolean checkType() {
-		// Create new scope for function
-		HierarchicalScope<Declaration> functionScope = new SymbolTable();
+public boolean checkType() {
+    HierarchicalScope<Declaration> functionScope = new SymbolTable();
+    
+    // Register parameters
+    for (ParameterDeclaration param : parameters) {
+        functionScope.register(param);
+    }
+    
+    // Set function context
+    if (!this.body.collectAndPartialResolve(functionScope, this)) {
+        return false;
+    }
+    
+    // Check for returns recursively
+    if (!hasValidReturn(this.body)) {
+        Logger.error("Function " + this.name + " missing return");
+        return false;
+    }
+    
+    return this.body.checkType();
+}
 
-		// Add parameters to scope
-		for (ParameterDeclaration param : parameters) {
-			functionScope.register(param);
-		}
-
-		// Step 1: Set function context with proper scope
-		boolean contextSet = this.body.collectAndPartialResolve(functionScope, this);
-		if (!contextSet) {
-			return false;
-		}
-
-		// Step 2: Check return types
-		boolean returnTypeCorrect = false;
-		for (Instruction instruction : this.body.getInstructions()) {
-			if (instruction instanceof Return) {
-				Return returnInstruction = (Return) instruction;
-				if (returnInstruction.getValue().getType().equalsTo(this.type)) {
-					returnTypeCorrect = true;
-				} else {
-					Logger.error("Function " + this.name + " return type mismatch");
-					return false;
-				}
-			}
-		}
-
-		if (!returnTypeCorrect) {
-			Logger.error("Function " + this.name + " missing return");
-			return false;
-		}
-
-		// Step 3: Check body types with proper scope
-		return this.body.checkType();
-	}
+private boolean hasValidReturn(Block block) {
+    for (Instruction instruction : block.getInstructions()) {
+        if (instruction instanceof Return) {
+            Return returnInst = (Return) instruction;
+            return returnInst.getValue().getType().equalsTo(this.type);
+        }
+        if (instruction instanceof Conditional) {
+            Conditional cond = (Conditional) instruction;
+            boolean thenReturns = hasValidReturn(cond.getThenBranch());
+            boolean elseReturns = cond.getElseBranch() == null || 
+                                hasValidReturn(cond.getElseBranch());
+            if (thenReturns && elseReturns) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 	/*
 	 * (non-Javadoc)

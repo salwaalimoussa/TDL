@@ -93,16 +93,14 @@ public class Block {
 	 *         declaration are
 	 *         allowed.
 	 */
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
-		boolean result = true;
-		// Parcourt toutes les instructions du bloc
-		for (Instruction instruction : this.instructions) {
-			// Chaque instruction est collectée dans le contexte de la fonction courante
-			// (_container)
-			result = result && instruction.collectAndPartialResolve(_scope, _container);
-		}
-		return result;
-	}
+	
+	 public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _function) {
+		 boolean result = true;
+		 for (Instruction instruction : this.instructions) {
+			 result = result && instruction.collectAndPartialResolve(_scope, _function);
+		 }
+		 return result;
+	 }
 
 	/**
 	 * Inherited Semantics attribute to check that all identifiers have been defined

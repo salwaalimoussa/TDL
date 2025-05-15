@@ -73,9 +73,12 @@ public class Conditional implements Instruction {
 	 * .Scope)
 	 */
 	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
-		return this.collectAndPartialResolve(_scope);
-	}
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _function) {
+    boolean conditionResolved = this.condition.collectAndPartialResolve(_scope);
+    boolean thenResolved = this.thenBranch.collectAndPartialResolve(_scope, _function);
+    boolean elseResolved = (this.elseBranch != null) ? this.elseBranch.collectAndPartialResolve(_scope, _function) : true;
+    return conditionResolved && thenResolved && elseResolved;
+}
 
 	/*
 	 * (non-Javadoc)
@@ -158,5 +161,12 @@ public Fragment getCode(TAMFactory _factory) {
     fragment.addSuffix(endLabel);
     
     return fragment;
+}
+public Block getThenBranch() {
+    return this.thenBranch;
+}
+
+public Block getElseBranch() {
+    return this.elseBranch;
 }
 }
