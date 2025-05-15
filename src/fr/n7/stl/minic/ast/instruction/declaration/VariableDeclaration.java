@@ -197,16 +197,16 @@ public class VariableDeclaration implements Declaration, Instruction {
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-    public Fragment getCode(TAMFactory _factory) {
-        Fragment fragment = _factory.createFragment();
-        
-        // Generate value code
-        fragment.append(value.getCode(_factory));
-        
-        // Store value
-        fragment.add(_factory.createStore(register, offset, type.length()));
-        
-        return fragment;
-    }
+	public Fragment getCode(TAMFactory _factory) {
+		Fragment fragment = _factory.createFragment();
+
+		// Generate value code
+		fragment.append(this.value.getCode(_factory));
+
+		// Store value
+		fragment.add(_factory.createStore(register, offset, type.length()));
+
+		return fragment;
+	}
 
 }

@@ -10,6 +10,7 @@ import fr.n7.stl.minic.ast.scope.HierarchicalScope;
 import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
+import fr.n7.stl.util.Logger;
 import java.util.List;
 
 /**
@@ -118,7 +119,11 @@ public class Block {
 		boolean result = true;
 
 		for (Instruction instruction : this.instructions) {
-			result = instruction.completeResolve(_scope) && result;
+			boolean resolved = instruction.completeResolve(_scope);
+			if (!resolved) {
+				Logger.error("Error: Failed to resolve instruction: " + instruction);
+			}
+			result = resolved && result;
 		}
 
 		return result;
