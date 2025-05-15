@@ -115,17 +115,17 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 * fr.n7.stl.block.ast.Instruction#allocateMemory(fr.n7.stl.tam.ast.Register,
 	 * int)
 	 */
+	
+
 	@Override
 	public int allocateMemory(Register _register, int _offset) {
-		// On alloue la mémoire dans les deux branches
-		this.thenBranch.allocateMemory(_register, _offset);
+		int currentOffset = _offset;
+		 this.thenBranch.allocateMemory(_register, currentOffset);
 		if (this.elseBranch != null) {
-			this.elseBranch.allocateMemory(_register, _offset);
+			this.elseBranch.allocateMemory(_register, currentOffset);
 		}
-		return _offset; // L'offset ne change pas en dehors du bloc
+		return currentOffset;
 	}
-
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -135,38 +135,28 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 public Fragment getCode(TAMFactory _factory) {
     Fragment fragment = _factory.createFragment();
     
-    // Création des étiquettes pour les sauts
-    String labelElse = "else_" + _factory.createLabelNumber();
-    String labelEnd = "endif_" + _factory.createLabelNumber();
+    // Generate condition code
+    fragment.append(condition.getCode(_factory));
     
-    // Génération du code pour évaluer la condition
-    fragment.append(this.condition.getCode(_factory));
+    // Create labels
+    String elseLabel = "else_" + _factory.createLabelNumber();
+    String endLabel = "endif_" + _factory.createLabelNumber();
     
-    // Si la condition est fausse (0), sauter à la branche else ou à la fin
-    fragment.add(_factory.createJumpIf(labelElse, 0));
+    // Jump to else if condition false
+    fragment.add(_factory.createJumpIf(elseLabel, 0));
     
-    // Code pour la branche "then"
-    fragment.append(this.thenBranch.getCode(_factory));
+    // Then branch
+    fragment.append(thenBranch.getCode(_factory));
+    fragment.add(_factory.createJump(endLabel));
     
-    // Si une branche "else" existe
-    if (this.elseBranch != null) {
-        // À la fin du bloc "then", sauter à la fin pour éviter d'exécuter le bloc "else"
-        fragment.add(_factory.createJump(labelEnd));
-        
-        // Étiquette pour le début du bloc "else"
-        fragment.addSuffix(labelElse);
-        
-        // Code pour la branche "else"
-        fragment.append(this.elseBranch.getCode(_factory));
-        
-        // Étiquette pour la fin de l'instruction conditionnelle
-        fragment.addSuffix(labelEnd);
-    } else {
-        // Si pas de branche "else", l'étiquette "else" marque directement la fin
-        fragment.addSuffix(labelElse);
+    // Else branch
+    fragment.addSuffix(elseLabel);
+    if (elseBranch != null) {
+        fragment.append(elseBranch.getCode(_factory));
     }
+    
+    fragment.addSuffix(endLabel);
     
     return fragment;
 }
-
 }

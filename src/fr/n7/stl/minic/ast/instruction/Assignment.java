@@ -160,7 +160,7 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 
 		// Génère le store : stocke la valeur à l'adresse
 		fragment.add(_factory.createStoreI(this.assignable.getType().length()));
-
+		//fragment.add(_factory.createStore(Register.SB, 0, value.getType().length()));
 		return fragment;
 	}
 	

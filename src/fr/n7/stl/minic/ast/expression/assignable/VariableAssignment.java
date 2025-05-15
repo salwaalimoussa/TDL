@@ -136,7 +136,7 @@ public class VariableAssignment extends AbstractIdentifier implements Assignable
 		));
 
 		// Store value at address
-		fragment.add(_factory.createStoreI(this.declaration.getType().length()));
+		//fragment.add(_factory.createStoreI(this.declaration.getType().length()));
 
 		return fragment;
 	}
