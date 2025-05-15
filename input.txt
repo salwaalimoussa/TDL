@@ -1,11 +1,4 @@
-/* --c-mode-- */
-pgcd {
-  int fact( int n ) {
-    if ( n == 0 ) {
-      return 1;
-    } else {
-      return n ;
-    }
-  }
- 
-}
+ test {
+ struct Point { int x; int y} p = { 1, 2};
+ Entier i = p.x + p.y;
+ }

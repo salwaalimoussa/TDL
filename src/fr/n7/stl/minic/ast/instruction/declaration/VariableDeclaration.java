@@ -145,7 +145,9 @@ public class VariableDeclaration implements Declaration, Instruction {
 
 	@Override
 	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-		return this.value.completeResolve(_scope);
+		boolean resolvedType = this.type.completeResolve(_scope);
+		boolean resolvedValue = (this.value == null) || this.value.completeResolve(_scope);
+		return resolvedType && resolvedValue;
 	}
 
 	/*
