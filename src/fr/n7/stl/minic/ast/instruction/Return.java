@@ -4,6 +4,8 @@
 package fr.n7.stl.minic.ast.instruction;
 
 import fr.n7.stl.minic.ast.expression.Expression;
+import fr.n7.stl.minic.ast.expression.FunctionCall;
+import fr.n7.stl.minic.ast.expression.accessible.BinaryExpression;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
@@ -68,17 +70,24 @@ public class Return implements Instruction {
 		return this.value.completeResolve(_scope);
 	}
 
-	@Override
-	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
-		if (this.function == null) {
+@Override
+public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
+    this.function = _container;
 
-			this.function = _container; // Associate the return statement with the function
-		} else if (!this.function.equals(_container)) {
-			Logger.error("Return statement is associated with a different function.");
-			return false;
-		}
-		return this.value.collectAndPartialResolve(_scope);
-	}
+    // Direct function call case
+    if (this.value instanceof FunctionCall) {
+        return ((FunctionCall) this.value).collectAndPartialResolve(_scope, _container);
+    }
+    
+    // Si c'est une BinaryExpression (ex : n * fact(n - 1))
+    if (this.value instanceof BinaryExpression) {
+        return ((BinaryExpression) this.value).collectAndPartialResolve(_scope, _container);
+    }
+
+    // Default case for other expressions
+    return this.value.collectAndPartialResolve(_scope);
+}
+
 
 	/*
 	 * (non-Javadoc)

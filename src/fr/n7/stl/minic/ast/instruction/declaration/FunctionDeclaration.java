@@ -142,7 +142,8 @@ public class FunctionDeclaration implements Instruction, Declaration {
 	 
 		 // Create a local scope for the function's parameters and body
 		 HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
-	 
+		     localScope.register(this); // ✅ POURQUOI ? Pour permettre l'appel récursif
+
 		 // Register parameters in the local scope
 		 boolean parametersResolved = true;
 		 for (ParameterDeclaration parameter : this.parameters) {

@@ -1,30 +1,28 @@
+fact
+PUSH 0
+POP (0) 0
+;(n == 0)
+LOAD (1) -1[LB]
+LOADL 0
+SUBR IEq
+JUMPIF (0) else_1
 LOADL 1
-STORE (1) 0[SB]
-LOADA 0[SB]
-STORE (8) 1[SB]
-LOAD (8) 1[SB]
-LOADI (8)
-STORE (1) 9[SB]
-LOADL 2
-LOAD (8) 1[SB]
-STOREI (1)
+RETURN (1) 0
+JUMP endif_2
+else_1
+;(n * fact((n - 1)))
+LOAD (1) -1[LB]
+;(n - 1)
+LOAD (1) -1[LB]
+LOADL 1
+SUBR ISub
+CALL (LB) fact
+SUBR IMul
+RETURN (1) 0
+endif_2
+RETURN (0) 0
 LOADL 5
-LOADL 1
-SUBR IMul
-SUBR MAlloc
-STORE (1) 10[SB]
-LOAD (1) 10[SB]
-LOADL 3
-LOADL 1
-SUBR IMul
-SUBR IAdd
-STORE (1) 11[SB]
-LOADL 4
-LOADA 10[SB]
-LOADL 3
-LOADL 1
-SUBR IMul
-SUBR IAdd
-STOREI (1)
+CALL (LB) fact
+SUBR IOut
 HALT
 

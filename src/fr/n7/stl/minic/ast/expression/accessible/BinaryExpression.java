@@ -3,6 +3,9 @@
  */
 package fr.n7.stl.minic.ast.expression.accessible;
 
+import fr.n7.stl.minic.ast.expression.Expression;
+import fr.n7.stl.minic.ast.expression.FunctionCall;
+import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
 import fr.n7.stl.minic.ast.type.AtomicType;
@@ -54,9 +57,10 @@ public class BinaryExpression implements AccessibleExpression {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString() {
-		return "(" + this.left + " " + this.operator + " " + this.right + ")";
-	}
+public String toString() {
+    return "(" + this.left.toString() + " " + this.operator.toString() + " " + this.right.toString() + ")";
+}
+
 	
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
@@ -64,6 +68,20 @@ public class BinaryExpression implements AccessibleExpression {
 		boolean _right = this.right.collectAndPartialResolve(_scope);
 		return _left && _right;
 	}
+
+	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _container) {
+    boolean leftOk = (this.left instanceof FunctionCall)
+        ? ((FunctionCall)this.left).collectAndPartialResolve(_scope, _container)
+        : this.left.collectAndPartialResolve(_scope);
+        
+    boolean rightOk = (this.right instanceof FunctionCall)
+        ? ((FunctionCall)this.right).collectAndPartialResolve(_scope, _container)
+        : this.right.collectAndPartialResolve(_scope);
+
+    return leftOk && rightOk;
+}
+
+	
 	
 	/* (non-Javadoc)
 	 * @see fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.Scope)
@@ -156,5 +174,14 @@ public class BinaryExpression implements AccessibleExpression {
 		_result.add(TAMFactory.createBinaryOperator(this.operator));
 		return _result;
 	}
+
+	public AccessibleExpression getLeft() {
+		return left;
+	}	
+
+	public AccessibleExpression getRight() {
+		return right;
+	}
+
 
 }

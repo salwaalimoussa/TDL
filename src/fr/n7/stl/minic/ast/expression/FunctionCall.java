@@ -29,6 +29,10 @@ public class FunctionCall implements AccessibleExpression {
 	 */
 	protected String name;
 
+	 public String getName() {
+        return this.name;
+    }
+
 	/**
 	 * Declaration of the called function after name resolution.
 	 * TODO : Should rely on the VariableUse class.
@@ -58,17 +62,21 @@ public class FunctionCall implements AccessibleExpression {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString() {
-		String _result = ((this.function == null) ? this.name : this.function) + "( ";
-		Iterator<AccessibleExpression> _iter = this.arguments.iterator();
-		if (_iter.hasNext()) {
-			_result += _iter.next();
-		}
-		while (_iter.hasNext()) {
-			_result += " ," + _iter.next();
-		}
-		return _result + ")";
-	}
+public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append(this.name);
+    builder.append("(");
+    boolean first = true;
+    for (Expression arg : this.arguments) {
+        if (!first) builder.append(", ");
+        builder.append(arg.toString());
+        first = false;
+    }
+    builder.append(")");
+    return builder.toString();
+    // Ne surtout pas inclure function.toString() ici, sinon récursion infinie
+}
+
 
 	/*
 	 * (non-Javadoc)
@@ -104,6 +112,23 @@ public class FunctionCall implements AccessibleExpression {
 			return false;
 		}
 	}
+
+	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _function) {
+    this.function = _function; // 🔁 lien avec soi-même pour récursivité
+
+    if (this.arguments.size() != _function.getParameters().size()) {
+        Logger.error("Incorrect number of arguments for recursive function " + this.name);
+        return false;
+    }
+
+    boolean result = true;
+    for (AccessibleExpression arg : this.arguments) {
+        result = result && arg.collectAndPartialResolve(_scope);
+    }
+
+    return result;
+}
+
 
 	/*
 	 * (non-Javadoc)

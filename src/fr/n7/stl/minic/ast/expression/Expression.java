@@ -1,6 +1,7 @@
 package fr.n7.stl.minic.ast.expression;
 
 import fr.n7.stl.minic.ast.SemanticsUndefinedException;
+import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
 import fr.n7.stl.minic.ast.type.Type;
@@ -25,6 +26,7 @@ public interface Expression {
 	 * allowed.
 	 */
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope);
+	
 	
 	/**
 	 * Inherited Semantics attribute to transmit the scope, check that the identifiers have been
