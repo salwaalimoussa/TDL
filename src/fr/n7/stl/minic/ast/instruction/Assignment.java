@@ -5,7 +5,6 @@ package fr.n7.stl.minic.ast.instruction;
 
 import fr.n7.stl.minic.ast.expression.Expression;
 import fr.n7.stl.minic.ast.expression.assignable.AssignableExpression;
-import fr.n7.stl.minic.ast.instruction.declaration.ConstantDeclaration;
 import fr.n7.stl.minic.ast.instruction.declaration.FunctionDeclaration;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
@@ -81,24 +80,13 @@ public class Assignment implements Instruction, Expression {
 	 * .HierarchicalScope)
 	 */
 	@Override
-public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-    // Vérifier si la variable assignée est connue dans la portée
-    Declaration decl = _scope.get(this.assignable.getName());
-    boolean ok1 = (decl != null);
 
-    if (!ok1) {
-        Logger.error("Error: Symbol not found in scope for " + this.assignable.getName());
-    } else if (decl instanceof ConstantDeclaration) {
-        Logger.error("Error: Cannot assign to a constant: " + this.assignable.getName());
-        ok1 = false;
-    }
+	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+		boolean ok1 = this.assignable.completeResolve(_scope);
+		boolean ok2 = this.value.completeResolve(_scope);
+		return ok1 && ok2;
+	}
 
-    // Résoudre l'expression assignable et la valeur
-    boolean ok2 = this.assignable.completeResolve(_scope);
-    boolean ok3 = this.value.completeResolve(_scope);
-
-    return ok1 && ok2 && ok3;
-}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -109,7 +97,6 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 		// On retourne simplement le type de la variable à laquelle on affecte
 		return this.assignable.getType();
 	}
-
 
 	/*
 	 * (non-Javadoc)
@@ -142,7 +129,6 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 		return _offset; // Aucun espace mémoire utilisé ici
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -160,10 +146,8 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 
 		// Génère le store : stocke la valeur à l'adresse
 		fragment.add(_factory.createStoreI(this.assignable.getType().length()));
-		//fragment.add(_factory.createStore(Register.SB, 0, value.getType().length()));
+		// fragment.add(_factory.createStore(Register.SB, 0, value.getType().length()));
 		return fragment;
 	}
-	
-
 
 }

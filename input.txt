@@ -1,10 +1,21 @@
 /* -*-c-mode-*- */
-test {
-   int v = 1;
-   int *ptr = &v;
-   int j = *ptr;
-   *ptr = 2;
-   int t[] = new int[5];
-   int i = t[3];
-   t[3] = 4;
+pgcd {
+  <int,int> c = {47,53};
+  const int test = 0;
+  int a = fst c;
+  int b = snd c;
+  while (a * b != test) {
+    if ( a > b ) {
+      int na = a-b;
+      a = na;
+    } else {
+      int nb = b-a;
+      b = nb;
+    }
+  }
+  int res = a;
+  if (res == test) {
+    res = b;
+  }
+  print res ;
 }

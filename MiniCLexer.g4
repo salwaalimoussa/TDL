@@ -27,7 +27,6 @@ Enumeration: 'enum';
 Nouveau: 'new';
 TantQue:'while';
 
-
 // Operateurs
 // Par défaut, les opérateurs sont associatifs à gauche
 Asterisque: '*';
