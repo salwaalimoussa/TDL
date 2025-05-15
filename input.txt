@@ -1,12 +1,10 @@
 /* -*-c-mode-*- */
-pgcd {
-  int fact( int n ) {
-    if ( n == 0 ) {
-      return 1;
-    } else {
-      return fact(1);
-      
-    }
-  }
-  print fact( 5 );
+test {
+   int v = 1;
+   int *ptr = &v;
+   int j = *ptr;
+   *ptr = 2;
+   int t[] = new int[5];
+   int i = t[3];
+   t[3] = 4;
 }

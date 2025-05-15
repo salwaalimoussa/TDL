@@ -3,7 +3,6 @@
  */
 package fr.n7.stl.minic.ast.type;
 
-import fr.n7.stl.minic.ast.SemanticsUndefinedException;
 import fr.n7.stl.minic.ast.scope.Declaration;
 import fr.n7.stl.minic.ast.scope.HierarchicalScope;
 
@@ -52,11 +51,14 @@ public class PointerType implements Type {
 	 * @see fr.n7.stl.block.ast.Type#compatibleWith(fr.n7.stl.block.ast.Type)
 	 */
 
-	@Override
-	public boolean compatibleWith(Type _other) {
-		throw new SemanticsUndefinedException("Semantics compatibleWith undefined in PointerType.");
-	}
-
+	 @Override
+	 public boolean compatibleWith(Type _other) {
+		 if (_other instanceof PointerType) {
+			 return this.element.compatibleWith(((PointerType) _other).getPointedType());
+		 } else {
+			 return false;
+		 }
+	 }
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -64,7 +66,13 @@ public class PointerType implements Type {
 	 */
 	@Override
 	public Type merge(Type _other) {
-		throw new SemanticsUndefinedException("Semantics merge undefined in PointerType.");
+		Type _result;
+		if (_other instanceof PointerType) {
+			_result = new PointerType(this.element.merge(((PointerType) _other).element));
+		} else {
+			_result = AtomicType.ErrorType;
+		}
+		return _result;
 	}
 
 	/*

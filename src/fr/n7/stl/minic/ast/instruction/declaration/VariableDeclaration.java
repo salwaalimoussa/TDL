@@ -157,21 +157,11 @@ public class VariableDeclaration implements Declaration, Instruction {
 	 */
 	@Override
 	public boolean checkType() {
-		// Récupérer le type de la valeur assignée à la variable
-		// Exemple : si la déclaration est "int x = 5;", alors valueType sera "int".
-		Type valueType = this.value.getType();
-
-		// Vérifier si le type de la valeur est compatible avec le type déclaré
-		// Exemple : si la déclaration est "int x = 5;", this.type est "int" et
-		// valueType est "int".
-		if (this.type.equalsTo(valueType)) {
-			return true; // Les types correspondent, la déclaration est valide.
+		if (type.compatibleWith(this.value.getType()) || this.value.getType().compatibleWith(type)) {
+			return true;
 		} else {
-			// En cas d'incompatibilité, enregistrer une erreur et retourner false
-			// Exemple : si la déclaration est "int x = 'string';", this.type est "int" et
-			// valueType est "String".
-			Logger.error("Type mismatch in variable declaration: expected " + this.type + ", but found " + valueType);
-			return false; // Les types ne correspondent pas, la déclaration est invalide.
+			Logger.error("The type of " + this.name + " is incompatible.");
+			return false;
 		}
 	}
 
