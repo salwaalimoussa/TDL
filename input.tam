@@ -1,19 +1,9 @@
-increment
+fact
 PUSH 0
 POP (0) 0
-;(x + 1)
 LOAD (1) -1[LB]
-LOADL 1
-SUBR IAdd
-RETURN (1) 0
-RETURN (0) 0
-main
-PUSH 0
-POP (0) 0
-LOADL 5
-CALL (LB) increment
-STORE (1) 0[LB]
-LOAD (1) 0[LB]
+STORE (1) 1[LB]
+LOAD (1) -1[LB]
 RETURN (1) 0
 RETURN (0) 0
 HALT

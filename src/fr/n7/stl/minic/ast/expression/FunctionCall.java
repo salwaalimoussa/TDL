@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Abstract Syntax Tree node for a function call expression.
+ * 
  * @author Marc Pantel
  *
  */
@@ -27,21 +28,23 @@ public class FunctionCall implements AccessibleExpression {
 	 * TODO : Should be an expression.
 	 */
 	protected String name;
-	
+
 	/**
 	 * Declaration of the called function after name resolution.
 	 * TODO : Should rely on the VariableUse class.
 	 */
 	protected FunctionDeclaration function;
-	
+
 	/**
-	 * List of AST nodes that computes the values of the parameters for the function call.
+	 * List of AST nodes that computes the values of the parameters for the function
+	 * call.
 	 */
 	protected List<AccessibleExpression> arguments;
-	
+
 	/**
-	 * @param _name : Name of the called function.
-	 * @param _arguments : List of AST nodes that computes the values of the parameters for the function call.
+	 * @param _name      : Name of the called function.
+	 * @param _arguments : List of AST nodes that computes the values of the
+	 *                   parameters for the function call.
 	 */
 	public FunctionCall(String _name, List<AccessibleExpression> _arguments) {
 		this.name = _name;
@@ -49,12 +52,14 @@ public class FunctionCall implements AccessibleExpression {
 		this.arguments = _arguments;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		String _result = ((this.function == null)?this.name:this.function) + "( ";
+		String _result = ((this.function == null) ? this.name : this.function) + "( ";
 		Iterator<AccessibleExpression> _iter = this.arguments.iterator();
 		if (_iter.hasNext()) {
 			_result += _iter.next();
@@ -62,52 +67,73 @@ public class FunctionCall implements AccessibleExpression {
 		while (_iter.hasNext()) {
 			_result += " ," + _iter.next();
 		}
-		return  _result + ")";
+		return _result + ")";
 	}
-	
-	/* (non-Javadoc)
-	 * @see fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.HierarchicalScope)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.
+	 * HierarchicalScope)
 	 */
 	@Override
 	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-		boolean _result = true;
-		for (AccessibleExpression _argument : this.arguments) {
-			_result &= _argument.collectAndPartialResolve(_scope);
-		}
-		if (_scope.contains(this.name)) {
-			this.function = (FunctionDeclaration) _scope.get(this.name);
+		Declaration d = _scope.get(this.name);
+		boolean result = true;
+
+		if (d instanceof FunctionDeclaration) {
+			this.function = (FunctionDeclaration) d;
+
+			// Vérifie que le nombre d'arguments correspond au nombre de paramètres
+			if (this.arguments.size() != this.function.getParameters().size()) {
+				Logger.error("Incorrect number of arguments for function " + this.name + ".");
+				return false;
+			}
+
+			// Résolution partielle des arguments
+			for (AccessibleExpression arg : this.arguments) {
+				result = result && arg.collectAndPartialResolve(_scope);
+			}
+
+			return result;
+
 		} else {
+			Logger.error("The function identifier " + this.name + " is not defined or is not a function.");
 			this.function = null;
-			Logger.error("Function " + this.name + " is not declared.");
-			_result = false;
+			return false;
 		}
-		return _result;
 	}
 
-	/* (non-Javadoc)
-	 * @see fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.HierarchicalScope)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.
+	 * HierarchicalScope)
 	 */
 	@Override
-public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-    // 1. Resolve function declaration
-    Declaration declaration = _scope.get(this.name);
-    if (declaration == null || !(declaration instanceof FunctionDeclaration)) {
-        Logger.error("Function " + this.name + " is not defined.");
-        return false;
-    }
-    this.function = (FunctionDeclaration) declaration;
+	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+		// 1. Resolve function declaration
+		Declaration declaration = _scope.get(this.name);
+		if (declaration == null || !(declaration instanceof FunctionDeclaration)) {
+			Logger.error("Function " + this.name + " is not defined.");
+			return false;
+		}
+		this.function = (FunctionDeclaration) declaration;
 
-    // 2. Resolve arguments
-    boolean result = true;
-    for (AccessibleExpression arg : this.arguments) {
-        result = result && arg.completeResolve(_scope);
-    }
+		// 2. Resolve arguments
+		boolean result = true;
+		for (AccessibleExpression arg : this.arguments) {
+			result = result && arg.completeResolve(_scope);
+		}
 
-    return result;
-}
+		return result;
+	}
 
-	
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.n7.stl.block.ast.Expression#getType()
 	 */
 	@Override
@@ -120,22 +146,24 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.n7.stl.block.ast.Expression#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-public Fragment getCode(TAMFactory _factory) {
-    Fragment fragment = _factory.createFragment();
-    
-    // 1. Generate code for arguments in reverse order
-    for (int i = this.arguments.size() - 1; i >= 0; i--) {
-        fragment.append(this.arguments.get(i).getCode(_factory));
-    }
-    
-    // 2. Call function
-    fragment.add(_factory.createCall(this.name, Register.LB));
-    
-    return fragment;
-}
+	public Fragment getCode(TAMFactory _factory) {
+		Fragment fragment = _factory.createFragment();
+
+		// 1. Generate code for arguments in reverse order
+		for (int i = this.arguments.size() - 1; i >= 0; i--) {
+			fragment.append(this.arguments.get(i).getCode(_factory));
+		}
+
+		// 2. Call function
+		fragment.add(_factory.createCall(this.name, Register.LB));
+
+		return fragment;
+	}
 
 }

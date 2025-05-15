@@ -1,10 +1,11 @@
-monProgramme {
-    int increment(int x) {
-        return x + 1;
+/* --c-mode-- */
+pgcd {
+  int fact( int n ) {
+    if ( n == 0 ) {
+      return 1;
+    } else {
+      return n ;
     }
-
-    int main() {
-        int y = increment(5);
-        return y;
-    }
+  }
+ 
 }

@@ -41,7 +41,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
      */
     public void startCompilation() {
         System.out.println(this.name + " " + this.mainBlock);
-         SymbolTable tds = new SymbolTable();
+        SymbolTable tds = new SymbolTable();
         if (this.mainBlock.collectAndPartialResolve(tds)) {
             System.out.println("collect succeeded");
             if (this.mainBlock.completeResolve(tds)) {
@@ -56,7 +56,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
                         TAMFactory factory = new TAMFactoryImpl();
                         Fragment f = this.mainBlock.getCode(factory);
                         f.add(factory.createHalt());
-                       // f.append(this.mainBlock.getFunctions(factory));
+                        // f.append(this.mainBlock.getFunctions(factory));
                         writer.println(f);
                         writer.close();
                     } catch (IOException e) {
@@ -72,9 +72,9 @@ public class ASTBuilder extends MiniCParserBaseListener {
             }
         } else {
             System.out.println("Collect failed : " + tds);
-        } 
         }
-        
+    }
+
     @Override
     public void exitProgramme(ProgrammeContext ctx) {
         this.mainBlock = ctx.main.b;
@@ -104,11 +104,11 @@ public class ASTBuilder extends MiniCParserBaseListener {
                 Type type = completeType(ctx.suiteIdent.get(i).id.getRight(), ctx.suiteType.get(i).t);
                 listParameters.add(new ParameterDeclaration(name, type));
             }
-        } 
+        }
         ctx.l = listParameters;
     }
 
-    private Type completeType(PartialType pType, Type type)  {
+    private Type completeType(PartialType pType, Type type) {
         Type res;
         if (pType == null) {
             res = type;
@@ -141,7 +141,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
         String name = ctx.identifiant().id.getLeft();
         Type returnType = completeType(ctx.identifiant().id.getRight(), ctx.type().t);
         List<ParameterDeclaration> parameters = ctx.parametres().l;
-        Block body = ctx.bloc().b; 
+        Block body = ctx.bloc().b;
         ctx.i = new FunctionDeclaration(name, returnType, parameters, body);
     }
 
@@ -159,12 +159,13 @@ public class ASTBuilder extends MiniCParserBaseListener {
     public void exitInstructionSiSinon(InstructionSiSinonContext ctx) {
         ctx.i = new Conditional(ctx.expression().e, ctx.alors.b, ctx.sinon.b);
     }
-     @Override
+
+    @Override
     public void exitInstructionSiAlors(InstructionSiAlorsContext ctx) {
         ctx.i = new Conditional(ctx.expression().e, ctx.alors.b);
     }
 
-     @Override
+    @Override
     public void exitInstructionTantQue(InstructionTantQueContext ctx) {
         ctx.i = new Iteration(ctx.expression().e, ctx.alors.b);
     }
@@ -492,7 +493,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
 
     @Override
     public void exitExpressionArrayAllocation(ExpressionArrayAllocationContext ctx) {
-        ctx.e = new ArrayAllocation(ctx.type().t, ctx.expression().e);     
+        ctx.e = new ArrayAllocation(ctx.type().t, ctx.expression().e);
     }
 
     @Override
@@ -508,7 +509,7 @@ public class ASTBuilder extends MiniCParserBaseListener {
             ctx.id = ctx.identifiant().id;
         } else {
             Pair<String, PartialType> ident = ctx.identifiant().id;
-            PartialType newPartialType = (ctx.Asterisque() != null) ? new PartialPointerType() : new PartialArrayType(); 
+            PartialType newPartialType = (ctx.Asterisque() != null) ? new PartialPointerType() : new PartialArrayType();
             if (ident.getRight() == null) {
                 ident.setRight(newPartialType);
             } else {
