@@ -120,48 +120,50 @@ public class FunctionDeclaration implements Instruction, Declaration {
 	// de la fonction
 	// elle renvoie true si tout s'est bien passé
 	// sinon elle renvoie false
-	//int add(int x, int y) {
-	//	return x + y;}
-	/*The function add is registered in the global scope.
-The parameters x and y are registered in the local scope of the function.
-The body of the function (return x + y;) is resolved using the local scope.
- */
+	// int add(int x, int y) {
+	// return x + y;}
+	/*
+	 * The function add is registered in the global scope.
+	 * The parameters x and y are registered in the local scope of the function.
+	 * The body of the function (return x + y;) is resolved using the local scope.
+	 */
 
+	@Override
+	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
+		// Enregistre la fonction dans la portée globale
+		if (_scope.accepts(this)) {
+			_scope.register(this);
+		} else {
+			Logger.error("Function " + this.name + " is already declared in this scope.");
+			return false;
+		}
 
- @Override
- public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-	 // Enregistre la fonction dans la portée globale
-	 if (_scope.accepts(this)) {
-		 _scope.register(this);
-	 } else {
-		 Logger.error("Function " + this.name + " is already declared in this scope.");
-		 return false;
-	 }
- 
-	 // Crée une portée locale pour les paramètres et le corps de la fonction
-	 HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
- 
-	 // Enregistre les paramètres dans la portée locale
-	 boolean parametersResolved = true;
-	 for (ParameterDeclaration parameter : this.parameters) {
-		 if (localScope.accepts(parameter)) {
-			 localScope.register(parameter); // Enregistre le paramètre
-		 } else {
-			 Logger.error("Parameter " + parameter.getName() + " is already declared in this scope.");
-			 parametersResolved = false;
-		 }
-	 }
- 
-	 // Collecte et résout partiellement le corps de la fonction
-	 boolean bodyResolved = this.body.collectAndPartialResolve(localScope);
- 
-	 return parametersResolved && bodyResolved;
- }
-@Override
-public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _function) {
-	// Delegate to the existing collectAndPartialResolve method
-	return this.collectAndPartialResolve(_scope);
-}
+		// Crée une portée locale pour les paramètres et le corps de la fonction
+		HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
+
+		// Enregistre les paramètres dans la portée locale
+		boolean parametersResolved = true;
+		for (ParameterDeclaration parameter : this.parameters) {
+			if (localScope.accepts(parameter)) {
+				localScope.register(parameter); // Enregistre le paramètre
+			} else {
+				Logger.error("Parameter " + parameter.getName() + " is already declared in this scope.");
+				parametersResolved = false;
+			}
+		}
+
+		// Collecte et résout partiellement le corps de la fonction
+		boolean bodyResolved = this.body.collectAndPartialResolve(localScope);
+
+		return parametersResolved && bodyResolved;
+	}
+
+	@Override
+	public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, FunctionDeclaration _function) {
+		// Delegate to the existing collectAndPartialResolve method
+		return this.collectAndPartialResolve(_scope);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -170,21 +172,28 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, F
 	 * .Scope)
 	 */
 	@Override
-public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-    // Fully resolve the parameters
-    boolean parametersResolved = true;
-    for (ParameterDeclaration parameter : this.parameters) {
-        if (!parameter.getType().completeResolve(_scope)) {
-            Logger.error("The type of parameter " + parameter.getName() + " could not be resolved.");
-            parametersResolved = false;
-        }
-    }
 
-    // Fully resolve the body of the function using a local scope
-    boolean bodyResolved = this.body.completeResolve(new SymbolTable(_scope));
+	public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+		// Fully resolve the parameters
+		boolean parametersResolved = true;
+		for (ParameterDeclaration parameter : this.parameters) {
+			if (!parameter.getType().completeResolve(_scope)) {
+				Logger.error("The type of parameter " + parameter.getName() + " could not be resolved.");
+				parametersResolved = false;
+			}
+		}
 
-    return parametersResolved && bodyResolved;
-}
+		// Crée une portée locale et ajoute les paramètres
+		HierarchicalScope<Declaration> localScope = new SymbolTable(_scope);
+		for (ParameterDeclaration parameter : this.parameters) {
+			localScope.register(parameter);
+		}
+
+		// Fully resolve the body of the function using la portée locale
+		boolean bodyResolved = this.body.completeResolve(localScope);
+
+		return parametersResolved && bodyResolved;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -192,43 +201,43 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 * @see fr.n7.stl.block.ast.instruction.Instruction#checkType()
 	 */
 	@Override
-public boolean checkType() {
-    // Create new scope for function
-    HierarchicalScope<Declaration> functionScope = new SymbolTable();
-    
-    // Add parameters to scope
-    for (ParameterDeclaration param : parameters) {
-        functionScope.register(param);
-    }
-    
-    // Step 1: Set function context with proper scope
-    boolean contextSet = this.body.collectAndPartialResolve(functionScope, this);
-    if (!contextSet) {
-        return false;
-    }
-    
-    // Step 2: Check return types
-    boolean returnTypeCorrect = false;
-    for (Instruction instruction : this.body.getInstructions()) {
-        if (instruction instanceof Return) {
-            Return returnInstruction = (Return) instruction;
-            if (returnInstruction.getValue().getType().equalsTo(this.type)) {
-                returnTypeCorrect = true;
-            } else {
-                Logger.error("Function " + this.name + " return type mismatch");
-                return false;
-            }
-        }
-    }
-    
-    if (!returnTypeCorrect) {
-        Logger.error("Function " + this.name + " missing return");
-        return false;
-    }
-    
-    // Step 3: Check body types with proper scope
-    return this.body.checkType();
-}
+	public boolean checkType() {
+		// Create new scope for function
+		HierarchicalScope<Declaration> functionScope = new SymbolTable();
+
+		// Add parameters to scope
+		for (ParameterDeclaration param : parameters) {
+			functionScope.register(param);
+		}
+
+		// Step 1: Set function context with proper scope
+		boolean contextSet = this.body.collectAndPartialResolve(functionScope, this);
+		if (!contextSet) {
+			return false;
+		}
+
+		// Step 2: Check return types
+		boolean returnTypeCorrect = false;
+		for (Instruction instruction : this.body.getInstructions()) {
+			if (instruction instanceof Return) {
+				Return returnInstruction = (Return) instruction;
+				if (returnInstruction.getValue().getType().equalsTo(this.type)) {
+					returnTypeCorrect = true;
+				} else {
+					Logger.error("Function " + this.name + " return type mismatch");
+					return false;
+				}
+			}
+		}
+
+		if (!returnTypeCorrect) {
+			Logger.error("Function " + this.name + " missing return");
+			return false;
+		}
+
+		// Step 3: Check body types with proper scope
+		return this.body.checkType();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -264,30 +273,31 @@ public boolean checkType() {
 	 * TAMFactory)
 	 */
 	@Override
-public Fragment getCode(TAMFactory _factory) {
-    Fragment fragment = _factory.createFragment();
-    
-    // 1. Add PUSH to make fragment non-empty before label
-    fragment.add(_factory.createPush(0));
-    
-    // 2. Now we can add the label safely
-    fragment.addPrefix(this.name);
-    
-    // 3. Remove temporary PUSH
-    fragment.add(_factory.createPop(0, 0));
-    // 4. Generate and add body code
-    Fragment bodyCode = this.body.getCode(_factory);
-    fragment.append(bodyCode);
-    
-    // 5. Add return sequence
-    fragment.add(_factory.createReturn(0, 0));
-    
-    return fragment;
-}
+	public Fragment getCode(TAMFactory _factory) {
+		Fragment fragment = _factory.createFragment();
 
-	/*public Block getBody() {
-		return this.body;
+		// 1. Add PUSH to make fragment non-empty before label
+		fragment.add(_factory.createPush(0));
+
+		// 2. Now we can add the label safely
+		fragment.addPrefix(this.name);
+
+		// 3. Remove temporary PUSH
+		fragment.add(_factory.createPop(0, 0));
+		// 4. Generate and add body code
+		Fragment bodyCode = this.body.getCode(_factory);
+		fragment.append(bodyCode);
+
+		// 5. Add return sequence
+		fragment.add(_factory.createReturn(0, 0));
+
+		return fragment;
 	}
-	*/
+
+	/*
+	 * public Block getBody() {
+	 * return this.body;
+	 * }
+	 */
 
 }
