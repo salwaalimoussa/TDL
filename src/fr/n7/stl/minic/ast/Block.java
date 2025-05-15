@@ -153,15 +153,14 @@ public class Block {
 	 *                  variables.
 	 * @param _offset   Inherited Current offset for the address of the variables.
 	 */
-	public void allocateMemory(Register _register, int _offset) {
-		int currentOffset = _offset;
-		for (Instruction instruction : this.instructions) {
-			// Chaque instruction peut allouer de la mémoire si elle le souhaite
-			currentOffset = instruction.allocateMemory(_register, currentOffset);
-		}
-		// Pas de retour ici, car méthode void → l'appelant doit gérer la suite s’il
-		// veut l’offset
-	}
+	
+	
+	 public void allocateMemory(Register _register, int _offset) {
+        int currentOffset = _offset;
+        for (Instruction instruction : this.instructions) {
+            currentOffset = instruction.allocateMemory(_register, currentOffset);
+        }
+    }
 
 	/**
 	 * Inherited Semantics attribute to build the nodes of the abstract syntax tree
@@ -172,16 +171,17 @@ public class Block {
 	 * @return Synthesized AST for the generated TAM code.
 	 */
 
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
+	
+	 public Fragment getCode(TAMFactory _factory) {
+        Fragment fragment = _factory.createFragment();
+        for (Instruction instruction : this.instructions) {
+            fragment.append(instruction.getCode(_factory));
+        }
+        return fragment;
+    }
+		 
+	 
 
-		for (Instruction instruction : this.instructions) {
-			// Génère et ajoute le code de chaque instruction à ce bloc
-			fragment.append(instruction.getCode(_factory));
-		}
-
-		return fragment;
-	}
 
 
 }

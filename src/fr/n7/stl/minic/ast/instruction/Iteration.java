@@ -94,24 +94,27 @@ public Fragment getCode(TAMFactory _factory) {
     String startLabel = "while_start_" + _factory.createLabelNumber();
     String endLabel = "while_end_" + _factory.createLabelNumber();
     
-    // Add initial instruction to make fragment non-empty
+    // Initial jump to condition
     fragment.add(_factory.createJump(startLabel));
     
-    // Loop body
-    fragment.append(body.getCode(_factory));
-    
-    // Add start label (now safe as fragment has content)
+    // While loop start
     fragment.addSuffix(startLabel);
     
     // Condition evaluation
     fragment.append(condition.getCode(_factory));
+    fragment.add(_factory.createJumpIf(endLabel, 0));
     
-    // Jump back to body if condition true
-    fragment.add(_factory.createJumpIf("while_body_" + startLabel, 1));
+    // Loop body - Fix variable address loading
+    fragment.append(body.getCode(_factory));
     
-    // Add end label
+    // Jump back to start
+    fragment.add(_factory.createJump(startLabel));
+    
+    // Loop exit
     fragment.addSuffix(endLabel);
     
     return fragment;
+
 }
+
 }
