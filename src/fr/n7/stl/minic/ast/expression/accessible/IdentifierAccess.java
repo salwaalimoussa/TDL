@@ -28,102 +28,54 @@ import fr.n7.stl.util.Logger;
  */
 public class IdentifierAccess extends AbstractIdentifier implements AccessibleExpression {
 
-	protected AbstractAccess expression;
+    protected AbstractAccess expression;
 
-	/**
-	 * Creates a variable use expression Abstract Syntax Tree node.
-	 * 
-	 * @param _name Name of the used variable.
-	 */
-	public IdentifierAccess(String _name) {
-		super(_name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return this.name;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.
-	 * HierarchicalScope)
-	 */
-	@Override
-public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
-    // Vérifie si l'identifiant est connu dans la portée
-    if (_scope.knows(this.name)) {
-        // Récupère la déclaration associée à l'identifiant
-        Declaration _declaration = _scope.get(this.name);
-
-        // Si c'est une variable, crée un accès à la variable
-        if (_declaration instanceof VariableDeclaration) {
-            this.expression = new VariableAccess((VariableDeclaration) _declaration);
-
-        // Si c'est une constante, crée un accès à la constante
-        } else if (_declaration instanceof ConstantDeclaration) {
-            this.expression = new ConstantAccess((ConstantDeclaration) _declaration);
-
-        // Si c'est un paramètre, crée un accès à la variable (les paramètres sont traités comme des variables)
-        } else if (_declaration instanceof ParameterDeclaration) {
-            // Crée un accès à la variable en utilisant le nom et le type du paramètre
-            ParameterDeclaration parameter = (ParameterDeclaration) _declaration;
-            this.expression = new VariableAccess(new VariableDeclaration(parameter.getName(), parameter.getType(), parameter.getOffset()));
-
-        // Si le type de déclaration n'est pas supporté, log une erreur
-        } else {
-            Logger.error("The declaration for " + this.name + " is of the wrong kind.");
-            return false;
-        }
-    } else {
-        // Si l'identifiant n'est pas trouvé, log une erreur
-        Logger.error("The identifier " + this.name + " has not been found.");
-        return false;
+    /**
+     * Creates a variable use expression Abstract Syntax Tree node.
+     * 
+     * @param _name Name of the used variable.
+     */
+    public IdentifierAccess(String _name) {
+        super(_name);
     }
-    return true;
-}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.
-	 * HierarchicalScope)
-	 */
-	@Override
-public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
-    // Si l'expression n'est pas encore résolue
-    if (this.expression == null) {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.n7.stl.block.ast.expression.Expression#collect(fr.n7.stl.block.ast.scope.
+     * HierarchicalScope)
+     */
+    @Override
+    public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope) {
         // Vérifie si l'identifiant est connu dans la portée
         if (_scope.knows(this.name)) {
             // Récupère la déclaration associée à l'identifiant
             Declaration _declaration = _scope.get(this.name);
 
-            // Si c'est une constante, crée un accès à la constante
-            if (_declaration instanceof ConstantDeclaration) {
-                this.expression = new ConstantAccess((ConstantDeclaration) _declaration);
-                return true;
-
             // Si c'est une variable, crée un accès à la variable
-            } else if (_declaration instanceof VariableDeclaration) {
+            if (_declaration instanceof VariableDeclaration) {
                 this.expression = new VariableAccess((VariableDeclaration) _declaration);
-                return true;
 
-            // Si c'est un paramètre, crée un accès à la variable (les paramètres sont traités comme des variables)
+                // Si c'est une constante, crée un accès à la constante
+            } else if (_declaration instanceof ConstantDeclaration) {
+                this.expression = new ConstantAccess((ConstantDeclaration) _declaration);
+
+                // Si c'est un paramètre, crée un accès à un paramètre
             } else if (_declaration instanceof ParameterDeclaration) {
-                // Crée un accès à la variable en utilisant le nom et le type du paramètre
-                ParameterDeclaration parameter = (ParameterDeclaration) _declaration;
-                this.expression = new VariableAccess(new VariableDeclaration(parameter.getName(), parameter.getType(), parameter.getOffset()));
-                return true;
+                this.expression = new ParameterAccess((ParameterDeclaration) _declaration);
 
-            // Si le type de déclaration n'est pas supporté, log une erreur
+                // Si le type de déclaration n'est pas supporté, log une erreur
             } else {
                 Logger.error("The declaration for " + this.name + " is of the wrong kind.");
                 return false;
@@ -133,29 +85,74 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
             Logger.error("The identifier " + this.name + " has not been found.");
             return false;
         }
-    } else {
-        // Si l'expression est déjà résolue, retourne true
         return true;
     }
-}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see fr.n7.stl.block.ast.Expression#getType()
-	 */
-	@Override
-	public Type getType() {
-		return this.expression.getType();
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see fr.n7.stl.block.ast.Expression#getCode(fr.n7.stl.tam.ast.TAMFactory)
-	 */
-	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		return this.expression.getCode(_factory);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * fr.n7.stl.block.ast.expression.Expression#resolve(fr.n7.stl.block.ast.scope.
+     * HierarchicalScope)
+     */
+    @Override
+    public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
+        // Si l'expression n'est pas encore résolue
+        if (this.expression == null) {
+            // Vérifie si l'identifiant est connu dans la portée
+            if (_scope.knows(this.name)) {
+                // Récupère la déclaration associée à l'identifiant
+                Declaration _declaration = _scope.get(this.name);
+
+                // Si c'est une constante, crée un accès à la constante
+                if (_declaration instanceof ConstantDeclaration) {
+                    this.expression = new ConstantAccess((ConstantDeclaration) _declaration);
+                    return true;
+
+                    // Si c'est une variable, crée un accès à la variable
+                } else if (_declaration instanceof VariableDeclaration) {
+                    this.expression = new VariableAccess((VariableDeclaration) _declaration);
+                    return true;
+
+                    // Si c'est un paramètre, crée un accès à un paramètre
+                } else if (_declaration instanceof ParameterDeclaration) {
+                    this.expression = new ParameterAccess((ParameterDeclaration) _declaration);
+                    return true;
+
+                    // Si le type de déclaration n'est pas supporté, log une erreur
+                } else {
+                    Logger.error("The declaration for " + this.name + " is of the wrong kind.");
+                    return false;
+                }
+            } else {
+                // Si l'identifiant n'est pas trouvé, log une erreur
+                Logger.error("The identifier " + this.name + " has not been found.");
+                return false;
+            }
+        } else {
+            // Si l'expression est déjà résolue, retourne true
+            return true;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.n7.stl.block.ast.Expression#getType()
+     */
+    @Override
+    public Type getType() {
+        return this.expression.getType();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see fr.n7.stl.block.ast.Expression#getCode(fr.n7.stl.tam.ast.TAMFactory)
+     */
+    @Override
+    public Fragment getCode(TAMFactory _factory) {
+        return this.expression.getCode(_factory);
+    }
 
 }

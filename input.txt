@@ -1,8 +1,10 @@
 monProgramme {
-    int i=  0;
-    while (i==2) {
-        i=1;
-        
+    int increment(int x) {
+        return x + 1;
     }
-   
+
+    int main() {
+        int y = increment(5);
+        return y;
+    }
 }
