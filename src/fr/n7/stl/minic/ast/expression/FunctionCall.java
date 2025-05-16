@@ -12,7 +12,6 @@ import fr.n7.stl.tam.ast.Fragment;
 import fr.n7.stl.tam.ast.Register;
 import fr.n7.stl.tam.ast.TAMFactory;
 import fr.n7.stl.util.Logger;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -177,18 +176,19 @@ public String toString() {
 	 * @see fr.n7.stl.block.ast.Expression#getCode(fr.n7.stl.tam.ast.TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
+public Fragment getCode(TAMFactory _factory) {
+    Fragment fragment = _factory.createFragment();
 
-		// 1. Generate code for arguments in reverse order
-		for (int i = this.arguments.size() - 1; i >= 0; i--) {
-			fragment.append(this.arguments.get(i).getCode(_factory));
-		}
+    // Génère les arguments (ordre inverse)
+    for (int i = this.arguments.size() - 1; i >= 0; i--) {
+        fragment.append(this.arguments.get(i).getCode(_factory));
+    }
 
-		// 2. Call function
-		fragment.add(_factory.createCall(this.name, Register.LB));
+    // Appel de la fonction via SB (depuis le programme principal)
+    fragment.add(_factory.createCall(this.name, Register.SB));
 
-		return fragment;
-	}
+    return fragment;
+}
+
 
 }

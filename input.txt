@@ -1,13 +1,21 @@
 /* -*-c-mode-*- */
 pgcd {
-
-  int fact( int n ) {
-    if ( n == 0 ) {
-      return 1;
+  <int,int> c = {47,53};
+  const int test = 0;
+  int a = fst c;
+  int b = snd c;
+  while (a * b != test) {
+    if ( a > b ) {
+      int na = a-b;
+      a = na;
     } else {
-      return n * (fact (n - 1));
+      int nb = b-a;
+      b = nb;
     }
   }
-  print fact( 5 );
+  int res = a;
+  if (res == test) {
+    res = b;
+  }
+  print res ;
 }
-

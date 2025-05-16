@@ -144,7 +144,8 @@ public boolean collectAndPartialResolve(HierarchicalScope<Declaration> _scope, F
 		// fonction
 		// fragment.add(_factory.createReturn(this.function.getType().length(),
 		// this.function.getBody().getAllocatedSize()));
-		fragment.add(_factory.createReturn(this.function.getType().length(), 0));
+		//fragment.add(_factory.createReturn(this.function.getType().length(), 0));
+		fragment.add(_factory.createReturn(this.function.getType().length(), this.function.getParameters().size()));
 
 		return fragment;
 	}

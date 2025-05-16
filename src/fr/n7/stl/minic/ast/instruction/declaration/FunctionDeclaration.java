@@ -278,26 +278,41 @@ private boolean hasValidReturn(Block block) {
 	 * TAMFactory)
 	 */
 	@Override
-	public Fragment getCode(TAMFactory _factory) {
-		Fragment fragment = _factory.createFragment();
+public Fragment getCode(TAMFactory _factory) {
+    Fragment fragment = _factory.createFragment();
 
-		// 1. Add PUSH to make fragment non-empty before label
-		fragment.add(_factory.createPush(0));
+    // Ajout du corps (le conditional qui contient then/else)
+    fragment.append(this.body.getCode(_factory));
 
-		// 2. Now we can add the label safely
-		fragment.addPrefix(this.name);
+    // Ajout du return après le corps (avec taille de la valeur retournée et nombre paramètres)
+    //fragment.add(_factory.createReturn(this.type.length(), this.parameters.size()));
+	if (!bodyHasReturn(this.body)) {
+        fragment.add(_factory.createReturn(this.type.length(), this.parameters.size()));
+    }
+    // Ajout label fonction (pour appel)
+    fragment.addPrefix(this.name);
 
-		// 3. Remove temporary PUSH
-		fragment.add(_factory.createPop(0, 0));
-		// 4. Generate and add body code
-		Fragment bodyCode = this.body.getCode(_factory);
-		fragment.append(bodyCode);
+    return fragment;
+}
 
-		// 5. Add return sequence
-		fragment.add(_factory.createReturn(0, 0));
 
-		return fragment;
+	private boolean bodyHasReturn(Block block) {
+		for (Instruction instr : block.getInstructions()) {
+			if (instr instanceof Return) {          // return explicite
+				return true;
+			}
+			if (instr instanceof Conditional ) {// if ... else ...
+				Conditional cond = (Conditional) instr;
+				if (bodyHasReturn(cond.getThenBranch())
+				 && cond.getElseBranch() != null
+				 && bodyHasReturn(cond.getElseBranch())) {
+					return true;                    // les deux branches retournent
+				}
+			}
+		}
+		return false;
 	}
+	
 
 	/*
 	 * public Block getBody() {

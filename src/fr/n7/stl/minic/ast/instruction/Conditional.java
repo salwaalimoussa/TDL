@@ -133,8 +133,7 @@ public boolean completeResolve(HierarchicalScope<Declaration> _scope) {
 	 * (non-Javadoc)
 	 * 
 	 * @see fr.n7.stl.block.ast.Instruction#getCode(fr.n7.stl.tam.ast.TAMFactory)
-	 */
-	@Override
+	 * @Override
 public Fragment getCode(TAMFactory _factory) {
     Fragment fragment = _factory.createFragment();
     
@@ -162,11 +161,40 @@ public Fragment getCode(TAMFactory _factory) {
     
     return fragment;
 }
-public Block getThenBranch() {
-    return this.thenBranch;
-}
 
-public Block getElseBranch() {
-    return this.elseBranch;
-}
+	 */
+	@Override
+	public Fragment getCode(TAMFactory _factory) {
+		Fragment fragment = _factory.createFragment();
+	
+		// Code condition n == 0
+		fragment.append(condition.getCode(_factory)); // Génère code pour charger n == 0
+	
+		String elseLabel = "else_" + _factory.createLabelNumber();
+		String endLabel = "endif_" + _factory.createLabelNumber();
+	
+		fragment.add(_factory.createJumpIf(elseLabel, 0)); // si faux (n != 0) sauter else
+	
+		// Then branch (return 1)
+		fragment.append(thenBranch.getCode(_factory)); // return 1
+		fragment.add(_factory.createJump(endLabel));
+	
+		// Else branch
+		fragment.addSuffix(elseLabel);
+		if (elseBranch != null) {
+			fragment.append(elseBranch.getCode(_factory));
+		}
+	
+		fragment.addSuffix(endLabel);
+	
+		return fragment;
+	}
+	public Block getThenBranch() {
+		return this.thenBranch;
+	}
+	
+	public Block getElseBranch() {
+		return this.elseBranch;
+	}
+	
 }
